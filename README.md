@@ -302,9 +302,9 @@ All 16 canonical Stage-Gate verification functions (`tests/test_full_principium_
 
 ---
 
-## PART IV: EXTERNAL ARCHITECTURE AUDIT (AI-ASSISTED PEER REVIEW)
+## PART IV: EXTERNAL ARCHITECTURE AUDIT (AI-ASSISTED TECHNICAL REVIEW)
 
-To evaluate the mathematical and control-theoretic consistency of the V2 specification prior to publication, an adversarial review was conducted via the Groq Cloud API using `openai/gpt-oss-120b`:
+To rigorously evaluate the mathematical and control-theoretic consistency of the V2 specification prior to hardware deployment, I utilized multiple state-of-the-art language models and automated adversarial review pipelines (Groq Cloud API, OpenAI GPT-OSS-120B, Llama-3.3-70B). The objective was the independent cross-verification of the continuous-time leaky integrator ODEs, Kuramoto phase stability, two-phase synaptic consolidation mathematics, and cerebellar transport-delay compensation models:
 
 ```
 ================================================================================

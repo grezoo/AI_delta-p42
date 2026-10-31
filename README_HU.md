@@ -302,13 +302,13 @@ Mind a 16 kanonikus ellenőrző funkciót (`tests/test_full_principium_matrix.py
 
 ---
 
-## IV. RÉSZ: KÜLSŐ ARCHITEKTÚRA AUDIT (AI-TÁMOGATOTT PEER REVIEW)
+## IV. RÉSZ: KÜLSŐ ARCHITEKTÚRA AUDIT (AI ÁLTAL TÁMOGATOTT SZAKMAI FELÜLVIZSGÁLAT)
 
-A V2 specifikáció matematikai és szabályozástechnikai konzisztenciáját a publikálás előtt a Groq Cloud API-n keresztül (`openai/gpt-oss-120b`) ellenőriztettük:
+A V2 specifikáció matematikai és kontrollelméleti konzisztenciájának értékeléséhez felhasználtam több nyelvi modellt (Groq Cloud API, OpenAI GPT-OSS-120B, Llama-3.3-70B) egy automatizált, ellenérdekű ellenőrzési folyamatban. A vizsgálat célja az Euler-diszkretizált differenciálegyenletek, a Kuramoto-fázisoszcillátor stabilitás, a kétfázisú szinaptikus konszolidációs egyenletek és a kisagyi holtidő-kompenzációs modellek független matematikai ellenőrzése volt még a fizikai implementáció és hardvertesztelés előtt:
 
 ```
 ================================================================================
-KÜLSŐ AI-TÁMOGATOTT ARCHITEKTÚRA FELÜLVIZSGÁLAT: GROQ CLOUD (openai/gpt-oss-120b)
+KÜLSŐ AI ÁLTAL TÁMOGATOTT SZAKMAI FELÜLVIZSGÁLAT: GROQ CLOUD (openai/gpt-oss-120b)
 Dokumentum: DELTA_P42_MESTER_TEZIS_V2.md és DELTA_P42_MUKODESI_ELVEK_V2.md
 Dátum: 2026-10-30 00:56:25 CET
 ================================================================================
