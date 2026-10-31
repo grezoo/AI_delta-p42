@@ -1,0 +1,2354 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ΔP-42 Futuristic Neural Interface — UI Dux Cockpit & 3D Classroom</title>
+    <style>
+        :root {
+            --bg-abyss: #030611;
+            --bg-panel: rgba(7, 14, 30, 0.78);
+            --bg-panel-hover: rgba(12, 22, 45, 0.88);
+            --border-subtle: rgba(0, 240, 255, 0.2);
+            --border-active: rgba(0, 240, 255, 0.7);
+            --cyan: #00f0ff;
+            --cyan-glow: 0 0 16px rgba(0, 240, 255, 0.5);
+            --purple: #a855f7;
+            --purple-glow: 0 0 16px rgba(168, 85, 247, 0.5);
+            --green: #00ff9d;
+            --green-glow: 0 0 16px rgba(0, 255, 157, 0.5);
+            --amber: #ffaa00;
+            --amber-glow: 0 0 16px rgba(255, 170, 0, 0.5);
+            --red: #ff3366;
+            --red-glow: 0 0 20px rgba(255, 51, 102, 0.6);
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+            --font-mono: 'Consolas', 'Courier New', monospace;
+            --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-abyss);
+            background-image: 
+                radial-gradient(circle at 50% 15%, rgba(0, 240, 255, 0.08) 0%, transparent 65%),
+                radial-gradient(circle at 85% 75%, rgba(168, 85, 247, 0.07) 0%, transparent 55%),
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Bar */
+        header {
+            background: rgba(4, 9, 22, 0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 10px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.8);
+        }
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-hexagon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--cyan), #0070f3);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 20px;
+            color: #030611;
+            box-shadow: var(--cyan-glow);
+        }
+
+        .brand-title {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #ffffff;
+            text-transform: uppercase;
+        }
+
+        .brand-sub {
+            font-size: 10px;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            font-family: var(--font-mono);
+        }
+
+        .top-telemetry-cluster {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hud-pill {
+            background: rgba(10, 18, 38, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hud-pill-active {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        .dot-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: pulse-dot 1.8s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
+        /* 5-Step Bottleneck Audit Banner */
+        .bottleneck-banner {
+            margin: 14px 20px 0 20px;
+            background: rgba(5, 12, 28, 0.85);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+        }
+
+        .bottleneck-steps {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .b-step {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-dim);
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+        }
+
+        .b-step.pass {
+            border-color: rgba(0, 255, 157, 0.4);
+            color: #d1fae5;
+            background: rgba(0, 255, 157, 0.08);
+        }
+
+        .b-step.fail {
+            border-color: var(--red);
+            color: #fecdd3;
+            background: rgba(255, 51, 102, 0.15);
+            box-shadow: 0 0 10px var(--red-glow);
+        }
+
+        .b-arrow {
+            color: var(--cyan);
+            opacity: 0.6;
+            font-size: 10px;
+        }
+
+        .b-readout {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--cyan);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Main Cockpit Layout */
+        main {
+            flex: 1;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 1920px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .grid-3col {
+            display: grid;
+            grid-template-columns: 340px 1fr 340px;
+            gap: 16px;
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 14px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+
+        .panel:hover {
+            border-color: var(--border-active);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            padding-bottom: 6px;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-chip {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--cyan);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+        }
+
+        /* 3D Virtual Classroom Viewport */
+        .classroom-container {
+            height: 240px;
+            background: radial-gradient(circle at 50% 60%, rgba(0, 240, 255, 0.06) 0%, rgba(2, 5, 14, 0.98) 80%);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+
+        canvas#classroomCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .classroom-hud {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .teacher-badge {
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid var(--purple);
+            padding: 4px 10px;
+            border-radius: 6px;
+            color: #e9d5ff;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .task-pills {
+            display: flex;
+            gap: 6px;
+            pointer-events: auto;
+        }
+
+        .btn-task {
+            background: rgba(8, 16, 36, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-task:hover, .btn-task.active {
+            border-color: var(--cyan);
+            color: #030611;
+            background: var(--cyan);
+            box-shadow: 0 0 12px var(--cyan-glow);
+        }
+
+        /* Microphone & Audio Diagnostic Card */
+        .audio-meter-box {
+            background: rgba(4, 8, 20, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .vu-meter-bar-container {
+            height: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .vu-meter-bar-fill {
+            height: 100%;
+            width: 15%;
+            background: linear-gradient(90deg, var(--green) 0%, var(--amber) 70%, var(--red) 100%);
+            box-shadow: 0 0 10px var(--cyan-glow);
+            transition: width 0.05s linear;
+        }
+
+        .vu-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            font-family: var(--font-mono);
+            color: var(--text-dim);
+        }
+
+        .audio-substats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 10px;
+            font-family: var(--font-mono);
+        }
+
+        .substat {
+            background: rgba(0,0,0,0.25);
+            padding: 5px 8px;
+            border-radius: 4px;
+            border-left: 2px solid var(--cyan);
+        }
+
+        /* Tactile 5-Finger Grip & Massage Sensor */
+        .hand-sensor-box {
+            background: rgba(4, 8, 20, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .finger-row {
+            display: grid;
+            grid-template-columns: 75px 1fr 40px;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-family: var(--font-mono);
+        }
+
+        .finger-bar-bg {
+            height: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .finger-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0070f3, var(--cyan));
+            transition: width 0.1s;
+        }
+
+        /* Center Column: Waveform, Dream Theater & Cortical Roster */
+        .center-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .scope-container {
+            height: 110px;
+            background: rgba(2, 5, 14, 0.95);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas#oscilloscope {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .scope-overlay {
+            position: absolute;
+            top: 6px;
+            right: 12px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--cyan);
+            text-align: right;
+            pointer-events: none;
+            text-shadow: 0 0 6px var(--cyan);
+        }
+
+        /* Circadian Dream Theater Visor */
+        .dream-visor {
+            background: rgba(10, 14, 34, 0.85);
+            border: 1px solid var(--purple);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 0 16px rgba(168, 85, 247, 0.15);
+        }
+
+        .dream-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+        }
+
+        .dream-content-stream {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            line-height: 1.4;
+            color: #e9d5ff;
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+            padding: 6px 10px;
+            border-left: 3px solid var(--purple);
+        }
+
+        /* 6 GGUF Cortical Roster */
+        .roster-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .roster-card {
+            background: rgba(6, 12, 26, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            transition: all 0.2s;
+        }
+
+        .roster-card.busy {
+            border-color: var(--amber);
+            box-shadow: 0 0 10px var(--amber-glow);
+        }
+
+        .r-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .r-model {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--cyan);
+        }
+
+        .r-meta {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-dim);
+        }
+
+        /* Right Column: Maslow, Memory & Trigger Deck */
+        .maslow-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .m-row {
+            display: grid;
+            grid-template-columns: 125px 1fr 35px;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-family: var(--font-mono);
+        }
+
+        .m-bar-bg {
+            height: 5px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .m-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0070f3, var(--cyan));
+            transition: width 0.2s;
+        }
+
+        /* Universal Action Alert Toast (Top Center) */
+        .universal-toast {
+            position: fixed;
+            top: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            background: rgba(5, 12, 30, 0.96);
+            border: 2px solid var(--cyan);
+            border-radius: 12px;
+            box-shadow: 0 12px 45px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 240, 255, 0.4);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 480px;
+            max-width: 820px;
+            backdrop-filter: blur(20px);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes toast-in {
+            from { opacity: 0; transform: translate(-50%, -20px) scale(0.96); }
+            to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+        }
+
+        .toast-icon {
+            font-size: 26px;
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5));
+        }
+
+        .toast-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .toast-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+        }
+
+        .toast-desc {
+            font-size: 14px;
+            color: #ffffff;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .toast-badge {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(0, 240, 255, 0.18);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        /* Live Action & Reaction Box in Trigger Deck */
+        .live-reaction-box {
+            background: rgba(4, 10, 24, 0.9);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.05);
+            transition: all 0.3s;
+        }
+
+        .live-reaction-box.reac-flash {
+            border-color: var(--green);
+            box-shadow: 0 0 16px rgba(0, 255, 157, 0.4), inset 0 0 15px rgba(0, 255, 157, 0.15);
+        }
+
+        .l-reac-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--cyan);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 5px;
+            margin-bottom: 6px;
+        }
+
+        .l-reac-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .l-reac-body {
+            font-size: 13px;
+            color: #bbf7d0;
+            margin-top: 3px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        /* Action Buttons Grid */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .btn-sci {
+            background: rgba(14, 24, 52, 0.9);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: #ffffff;
+            padding: 11px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            user-select: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .btn-sci:hover {
+            border-color: var(--cyan);
+            background: rgba(0, 240, 255, 0.22);
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
+            transform: translateY(-2px);
+        }
+
+        .btn-sci:active, .btn-sci.btn-active {
+            transform: scale(0.96);
+            background: var(--cyan) !important;
+            color: #030611 !important;
+            box-shadow: 0 0 20px #00f0ff !important;
+        }
+
+        .btn-sci.btn-loading {
+            opacity: 0.7;
+            pointer-events: none;
+            filter: grayscale(0.5);
+        }
+
+        /* Distinct Action Button Themes */
+        .btn-praise { border-color: rgba(0, 255, 157, 0.5); color: #a7f3d0; background: rgba(0, 255, 157, 0.12); }
+        .btn-praise:hover { background: rgba(0, 255, 157, 0.28); border-color: var(--green); box-shadow: var(--green-glow); }
+
+        .btn-scold { border-color: rgba(255, 170, 0, 0.5); color: #fde68a; background: rgba(255, 170, 0, 0.12); }
+        .btn-scold:hover { background: rgba(255, 170, 0, 0.28); border-color: var(--amber); box-shadow: var(--amber-glow); }
+
+        .btn-feed { border-color: rgba(56, 189, 248, 0.5); color: #bae6fd; background: rgba(56, 189, 248, 0.12); }
+        .btn-feed:hover { background: rgba(56, 189, 248, 0.28); border-color: #38bdf8; }
+
+        .btn-tactile { border-color: rgba(244, 114, 182, 0.5); color: #fbcfe8; background: rgba(244, 114, 182, 0.12); }
+        .btn-tactile:hover { background: rgba(244, 114, 182, 0.28); border-color: #f472b6; }
+
+        .btn-glass { border-color: rgba(34, 211, 238, 0.5); color: #cffafe; background: rgba(34, 211, 238, 0.12); }
+        .btn-glass:hover { background: rgba(34, 211, 238, 0.28); border-color: #22d3ee; }
+
+        .btn-slip { border-color: rgba(96, 165, 250, 0.5); color: #bfdbfe; background: rgba(96, 165, 250, 0.12); }
+        .btn-slip:hover { background: rgba(96, 165, 250, 0.28); border-color: #60a5fa; }
+
+        .btn-hot { border-color: rgba(248, 113, 113, 0.5); color: #fecdd3; background: rgba(248, 113, 113, 0.14); }
+        .btn-hot:hover { background: rgba(248, 113, 113, 0.3); border-color: var(--red); box-shadow: var(--red-glow); }
+
+        .btn-threat { border-color: rgba(239, 68, 68, 0.7); color: #ffffff; background: rgba(239, 68, 68, 0.25); font-weight: 800; }
+        .btn-threat:hover { background: rgba(239, 68, 68, 0.5); border-color: #ef4444; box-shadow: 0 0 20px #ef4444; }
+
+        .btn-massage { border-color: rgba(192, 132, 252, 0.5); color: #f3e8ff; background: rgba(192, 132, 252, 0.12); }
+        .btn-massage:hover { background: rgba(192, 132, 252, 0.28); border-color: #c084fc; }
+
+        .btn-sleep { border-color: rgba(168, 85, 247, 0.5); color: #f3e8ff; background: rgba(168, 85, 247, 0.14); }
+        .btn-sleep:hover { background: rgba(168, 85, 247, 0.3); border-color: var(--purple); box-shadow: var(--purple-glow); }
+
+        .btn-video { border-color: rgba(232, 121, 249, 0.5); color: #fae8ff; background: rgba(232, 121, 249, 0.12); }
+        .btn-video:hover { background: rgba(232, 121, 249, 0.28); border-color: #e879f9; }
+
+        .btn-web { border-color: rgba(45, 212, 191, 0.5); color: #ccfbf1; background: rgba(45, 212, 191, 0.12); }
+        .btn-web:hover { background: rgba(45, 212, 191, 0.28); border-color: #2dd4bf; }
+
+        /* Bottom Split Stream */
+        .bottom-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            min-height: 250px;
+        }
+
+        .stream-scroll {
+            flex: 1;
+            background: rgba(2, 6, 16, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-y: auto;
+            max-height: 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .msg-line {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .msg-inner-voice {
+            background: rgba(0, 240, 255, 0.06);
+            border-left: 3px solid var(--cyan);
+            color: #bbf7d0;
+        }
+
+        .msg-pfc-strat {
+            background: rgba(168, 85, 247, 0.08);
+            border-left: 3px solid var(--purple);
+            color: #f3e8ff;
+        }
+
+        .msg-caretaker-text {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid #94a3b8;
+            color: #ffffff;
+        }
+
+        .msg-child-reply {
+            background: rgba(0, 255, 157, 0.08);
+            border-left: 3px solid var(--green);
+            color: #ecfdf5;
+            font-weight: 600;
+        }
+
+        .chat-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(6, 12, 28, 0.9);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 8px 12px;
+            color: #ffffff;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--cyan);
+            box-shadow: var(--cyan-glow);
+        }
+
+        .btn-send {
+            background: linear-gradient(135deg, #0070f3, var(--cyan));
+            color: #030611;
+            border: none;
+            border-radius: 5px;
+            padding: 0 16px;
+            font-weight: 700;
+            font-size: 11px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation Bar -->
+    <header>
+        <div class="brand-box">
+            <div class="brand-hexagon">Δ</div>
+            <div>
+                <div class="brand-title">ΔP-42 Neural Interface</div>
+                <div class="brand-sub">Sovereign Cognitive Architecture // RTX 5070</div>
+            </div>
+        </div>
+
+        <div class="top-telemetry-cluster">
+            <div class="hud-pill hud-pill-active">
+                <span class="dot-pulse" id="wsDot"></span>
+                <span style="color:var(--text-dim);">WS:</span>
+                <span id="wsStatus" style="color:var(--green); font-weight:bold;">LIVE (50Hz)</span>
+            </div>
+            <div class="hud-pill">
+                <span style="color:var(--text-dim);">Pacemaker:</span>
+                <span id="topCadence" style="color:var(--cyan); font-weight:bold;">50.0 Hz</span>
+            </div>
+            <div class="hud-pill">
+                <span style="color:var(--text-dim);">VRAM:</span>
+                <span id="topVram" style="color:var(--cyan); font-weight:bold;">2879 MB</span>
+            </div>
+            <div class="hud-pill">
+                <span style="color:var(--text-dim);">Szakasz:</span>
+                <span id="topStage" style="color:var(--amber); font-weight:bold;">1. Bölcsőde</span>
+            </div>
+            <div class="hud-pill" id="circadianPill" style="border-color: var(--green);">
+                <span style="color:var(--text-dim);">Cirkadián:</span>
+                <span id="topCircadian" style="color:var(--green); font-weight:bold;">ÉBREN</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Universal Floating Action Alert Toast -->
+    <div id="universalToast" class="universal-toast" style="display:none;">
+        <div class="toast-icon" id="toastIcon">⚡</div>
+        <div class="toast-body">
+            <div class="toast-title" id="toastTitle">PARANCS VÉGREHAJTVA</div>
+            <div class="toast-desc" id="toastDesc">Várakozás a neurális mag válaszára...</div>
+        </div>
+        <div class="toast-badge" id="toastBadge">AKTÍV</div>
+    </div>
+
+    <!-- 5-Step Bottleneck Audit Banner -->
+    <div class="bottleneck-banner">
+        <div class="bottleneck-steps">
+            <div class="b-step pass" id="step_mic">
+                <span>🎤 1. Szenzor/Mic</span>
+            </div>
+            <span class="b-arrow">➔</span>
+            <div class="b-step pass" id="step_thalamus">
+                <span>🎛️ 2. Talamusz (δ &ge; ε)</span>
+            </div>
+            <span class="b-arrow">➔</span>
+            <div class="b-step pass" id="step_theta">
+                <span>⚡ 3. Hajtóerő (θ &ge; 18°)</span>
+            </div>
+            <span class="b-arrow">➔</span>
+            <div class="b-step pass" id="step_etiquette">
+                <span>🛡️ 4. Illemkorlát</span>
+            </div>
+            <span class="b-arrow">➔</span>
+            <div class="b-step pass" id="step_motor">
+                <span>⚙️ 5. Alapi Dúcok (Go)</span>
+            </div>
+        </div>
+
+        <div class="b-readout">
+            <span style="color:var(--text-dim);">DÖNTÉSI DIAGNOSZTIKA:</span>
+            <span id="bottleneckText" style="color:var(--green);">✅ MINDEN RENDSZER SZABAD (GO)</span>
+        </div>
+    </div>
+
+    <!-- Main Diagnostic Grid -->
+    <main>
+        <div class="grid-3col">
+            
+            <!-- LEFT COLUMN: Audio/Microphone & Tactile Sensors -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+                        Szenzoros & Akusztikus Ingestion
+                    </span>
+                    <span class="panel-chip">VAD & TACTILE</span>
+                </div>
+
+                <!-- Live Microphone VU-Meter -->
+                <div class="audio-meter-box">
+                    <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:700;">
+                        <span>🎤 Mikrofon Akusztikus Szint</span>
+                        <span id="vadStatusTag" style="color:var(--text-dim); font-family:var(--font-mono);">CSEND</span>
+                    </div>
+                    <div class="vu-meter-bar-container">
+                        <div class="vu-meter-bar-fill" id="vuBarFill"></div>
+                    </div>
+                    <div class="vu-labels">
+                        <span>-60 dB</span><span>-36 dB</span><span>-18 dB</span><span>-6 dB</span><span>0 dB</span>
+                    </div>
+                    <div class="audio-substats">
+                        <div class="substat"><div>Szint:</div><b id="audioDbReadout">-52.0 dB</b></div>
+                        <div class="substat"><div>Talamusz Ping:</div><b id="audioPingReadout" style="color:var(--green);">COMPUTE BYPASS</b></div>
+                    </div>
+                </div>
+
+                <!-- Sovereign Dynamic Neural Core & Super-PID (RTX 5070 CUDA) -->
+                <div class="audio-meter-box" style="border-color: rgba(0, 240, 255, 0.35); background: rgba(8, 16, 36, 0.95); margin-bottom: 8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; font-weight:700;">
+                        <span style="color:var(--cyan); display:flex; align-items:center; gap:6px;">
+                            <span class="dot-pulse" style="width:6px; height:6px; background:var(--cyan); box-shadow:0 0 6px var(--cyan);"></span>
+                            🧠 Dinamikus Neurális Mag & Super-PID
+                        </span>
+                        <span id="coreCudaTag" style="color:var(--green); font-family:var(--font-mono); font-size:10px; background:rgba(0,255,157,0.1); padding:1px 6px; border-radius:3px; border:1px solid rgba(0,255,157,0.3);">RTX 5070 CUDA</span>
+                    </div>
+                    <div class="audio-substats" style="margin-top:6px;">
+                        <div class="substat"><div>Élő Szinapszisok:</div><b id="coreSynCount" style="color:#ffffff;">43,152</b></div>
+                        <div class="substat"><div>Rejtett Norma |h|:</div><b id="coreHnorm" style="color:var(--cyan);">0.000</b></div>
+                        <div class="substat"><div>Super-PID Damping:</div><b id="corePidOut" style="color:var(--purple);">+0.000</b></div>
+                        <div class="substat"><div>STDP Plaszticitás:</div><b id="corePlasticity" style="color:var(--amber);">0.000</b></div>
+                        <div class="substat"><div>REM Szórás-csökk.:</div><b id="coreVarRed" style="color:var(--green);">0.0%</b></div>
+                        <div class="substat"><div>Motor Gating:</div><b id="coreAmotor" style="color:var(--cyan);">0.00</b></div>
+                    </div>
+                </div>
+
+                <!-- Tactile 5-Finger Grip & Hand Sensor -->
+                <div class="hand-sensor-box">
+                    <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:700; margin-bottom:4px;">
+                        <span>🖐️ Taktilis Pohár & Masszázs Ujjbegy-Mátrix</span>
+                        <span id="gripStatusTag" style="color:var(--cyan); font-family:var(--font-mono);">SZABAD</span>
+                    </div>
+
+                    <div class="finger-row">
+                        <span>Hüvelyk (F1)</span>
+                        <div class="finger-bar-bg"><div class="finger-bar-fill" id="fBar0"></div></div>
+                        <span id="fVal0">0.0 N</span>
+                    </div>
+                    <div class="finger-row">
+                        <span>Mutató (F2)</span>
+                        <div class="finger-bar-bg"><div class="finger-bar-fill" id="fBar1"></div></div>
+                        <span id="fVal1">0.0 N</span>
+                    </div>
+                    <div class="finger-row">
+                        <span>Középső (F3)</span>
+                        <div class="finger-bar-bg"><div class="finger-bar-fill" id="fBar2"></div></div>
+                        <span id="fVal2">0.0 N</span>
+                    </div>
+                    <div class="finger-row">
+                        <span>Gyűrűs (F4)</span>
+                        <div class="finger-bar-bg"><div class="finger-bar-fill" id="fBar3"></div></div>
+                        <span id="fVal3">0.0 N</span>
+                    </div>
+                    <div class="finger-row">
+                        <span>Kisujj (F5)</span>
+                        <div class="finger-bar-bg"><div class="finger-bar-fill" id="fBar4"></div></div>
+                        <span id="fVal4">0.0 N</span>
+                    </div>
+
+                    <div class="audio-substats" style="margin-top:4px;">
+                        <div class="substat"><div>Csúszás v_slip:</div><b id="slipVal">0.00 m/s</b></div>
+                        <div class="substat"><div>Össz szorítóerő:</div><b id="totalGripVal">0.0 N</b></div>
+                    </div>
+                </div>
+
+                <!-- Thalamus DSP AGC & Synesthesia Card -->
+                <div class="audio-meter-box">
+                    <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:700;">
+                        <span>🎛️ Talamusz DSP Keverőpult</span>
+                        <span id="thalamusState" style="color:var(--cyan); font-family:var(--font-mono);">BYPASS</span>
+                    </div>
+                    <div class="audio-substats">
+                        <div class="substat"><div>Hiba δ:</div><b id="tDelta">0.000</b></div>
+                        <div class="substat"><div>Küszöb ε:</div><b id="tEps">0.150</b></div>
+                        <div class="substat"><div>g_AGC erősítés:</div><b id="tGain">1.00x</b></div>
+                        <div class="substat"><div>Szinesztézia β:</div><b id="tBeta">0.10</b></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CENTER COLUMN: 3D Virtual Classroom, Waveform, Dream Theater & Cortical Roster -->
+            <div class="center-stack">
+                
+                <!-- 3D VIRTUAL CLASSROOM VIEWPORT -->
+                <div class="panel" style="padding:10px;">
+                    <div class="panel-header" style="margin-bottom:6px;">
+                        <span class="panel-title" style="color:var(--cyan);">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                            3D Virtuális Tanterem & Manipulátor Kar (Embodied Sandbox)
+                        </span>
+                        <span class="panel-chip" id="taskNameChip" style="color:#ffffff; background:rgba(168,85,247,0.2); border-color:var(--purple);">
+                            1. LECKE: PIROS LABDA
+                        </span>
+                    </div>
+
+                    <div class="classroom-container">
+                        <canvas id="classroomCanvas"></canvas>
+                        <div class="classroom-hud">
+                            <div class="teacher-badge" style="display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:12px;">👨‍🏫 Autonóm Nevelő:</span>
+                                <span id="hudTeacherStatus" style="color:#ffffff; font-weight:bold; font-size:12px;">Vezeti a tanórát...</span>
+                                <button id="btnTeacherToggle" class="btn-sci" style="padding:4px 10px; font-size:11px; border-color:var(--amber); color:var(--amber);" onclick="toggleTeacher()">⏸️ Csendesítés (Standby)</button>
+                            </div>
+                            <div class="task-pills">
+                                <button class="btn-task active" onclick="sendActionBtn(this, 'set_task', {task_id: 1})">1. Labda</button>
+                                <button class="btn-task" onclick="sendActionBtn(this, 'set_task', {task_id: 2})">2. Pohár</button>
+                                <button class="btn-task" onclick="sendActionBtn(this, 'set_task', {task_id: 3})">3. Forró Csésze</button>
+                                <button class="btn-task" onclick="sendActionBtn(this, 'set_task', {task_id: 4})">4. Illem</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theta Pacemaker Oscilloscope -->
+                <div class="panel" style="padding:10px;">
+                    <div class="panel-header" style="margin-bottom:4px;">
+                        <span class="panel-title">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                            50 Hz Pacemaker Határciklus & Kuramoto Koherencia
+                        </span>
+                        <span class="panel-chip">NON-EQUILIBRIUM LIMIT CYCLE</span>
+                    </div>
+                    <div class="scope-container">
+                        <canvas id="oscilloscope"></canvas>
+                        <div class="scope-overlay">
+                            <div>θ: <b id="scopeTheta" style="color:var(--green); font-size:12px;">15.00°</b></div>
+                            <div>dθ/dt: <span id="scopeDotTheta">+0.00 rad/s</span></div>
+                            <div>Kuramoto r: <span id="scopeKuramoto" style="color:var(--amber);">0.850</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dream Theater & REM Simulation Visor -->
+                <div class="dream-visor" id="dreamVisorBox">
+                    <div class="dream-header">
+                        <span style="color:var(--purple); display:flex; align-items:center; gap:6px;">
+                            🌙 Cirkadián Állapot & REM Álom-Szimulátor
+                        </span>
+                        <span id="atoniaLockTag" style="color:var(--green); background:rgba(0,255,157,0.1); padding:2px 8px; border-radius:4px; border:1px solid rgba(0,255,157,0.3);">
+                            MOTOROS ATONIA: FELOLDVA (ÉBREN)
+                        </span>
+                    </div>
+                    <div class="dream-content-stream" id="dreamText">
+                        Nincs aktív álom (ébrenléti állapot).
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:10px; font-family:var(--font-mono); color:var(--text-dim);">
+                        <span>Utolsó álom verdict: <b id="dVerdict" style="color:#ffffff;">APPROVED</b></span>
+                        <span>ΔL Veszteség arány: <b id="dLoss" style="color:var(--purple);">0.0000</b></span>
+                    </div>
+                </div>
+
+                <!-- Epistemic Web Radar, Multimodal YouTube & Cognitive Cinema -->
+                <div class="panel" style="padding:10px; border-color:rgba(168,85,247,0.3); background:rgba(18,22,36,0.85); margin-bottom:8px;">
+                    <div class="panel-header" style="margin-bottom:6px;">
+                        <span class="panel-title" style="color:#d8b4fe;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                            🎬 Multimodális Kereszt-Modális Mozi & Időszelet Horgonyzás
+                        </span>
+                        <span id="forageStatusBadge" style="font-size:10px; padding:2px 8px; border-radius:4px; background:rgba(0,255,157,0.1); border:1px solid rgba(0,255,157,0.3); color:var(--green); font-family:var(--font-mono);">KÉSZENLÉT</span>
+                    </div>
+
+                    <!-- YouTube Link Input Bar -->
+                    <div style="display:flex; gap:6px; margin-bottom:8px;">
+                        <input type="text" id="ytUrlInput" class="chat-input" placeholder="Illessz be egy YouTube linket (pl. https://www.youtube.com/watch?v=libKVRa01L8)..." style="font-size:11px; padding:5px 8px;">
+                        <button class="btn-sci" style="border-color:var(--purple); color:#d8b4fe; white-space:nowrap; padding:4px 10px;" onclick="submitYouTubeUrl()">▶️ Vetítés</button>
+                    </div>
+
+                    <!-- Tri-Modal Sensory Synchronization Card -->
+                    <div style="background:rgba(0,0,0,0.4); padding:8px 10px; border-radius:8px; border:1px solid rgba(168,85,247,0.3); margin-bottom:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <span id="ytTitle" style="font-weight:bold; color:#ffffff; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px;">Solar System 101 | National Geographic</span>
+                            <span id="ytTimeBadge" style="font-family:var(--font-mono); font-size:10px; color:var(--cyan); background:rgba(0,240,255,0.1); padding:2px 6px; border-radius:4px; border:1px solid rgba(0,240,255,0.25);">00:06 / 04:10</span>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns: 130px 1fr; gap:10px; align-items:start;">
+                            <!-- 1. Visual Frame -->
+                            <div style="position:relative;">
+                                <img id="ytLiveFrame" src="https://img.youtube.com/vi/libKVRa01L8/hqdefault.jpg" style="width:130px; height:74px; object-fit:cover; border-radius:4px; border:1px solid rgba(0,240,255,0.4); display:block;">
+                                <div style="position:absolute; bottom:2px; left:2px; background:rgba(0,0,0,0.75); font-size:8px; font-family:var(--font-mono); color:var(--cyan); padding:1px 4px; border-radius:2px;">
+                                    👁️ KÉPKOCKA
+                                </div>
+                            </div>
+
+                            <!-- 2. Audio Waveform & Text Context -->
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <!-- Spoken Text -->
+                                <div style="background:rgba(18,22,36,0.95); padding:4px 6px; border-radius:4px; border-left:3px solid var(--amber);">
+                                    <div style="font-size:8px; color:var(--amber); font-family:var(--font-mono); text-transform:uppercase;">📖 Kimondott szöveg / Felirat:</div>
+                                    <div id="ytTranscriptText" style="font-size:11px; font-weight:600; color:#ffffff; margin-top:2px; max-height:36px; overflow-y:auto;">
+                                        « in the entire Milky Way galaxy »
+                                    </div>
+                                </div>
+
+                                <!-- Acoustic Waveform Monitor & Audio Player -->
+                                <div style="background:rgba(4,8,20,0.85); padding:4px 6px; border-radius:4px; border:1px solid rgba(0,255,157,0.2);">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; font-size:8px; font-family:var(--font-mono); color:var(--green);">
+                                        <span>👂 HANGHULLÁM (RMS: <b id="ytRmsVal">1435</b>)</span>
+                                        <span id="ytSpeechStatus" style="color:var(--green);">BESZÉD ÉSZLELVE</span>
+                                    </div>
+                                    <canvas id="ytWaveformCanvas" width="220" height="24" style="width:100%; height:24px; background:rgba(0,0,0,0.5); border-radius:3px; display:block;"></canvas>
+                                    <audio id="ytAudioPlayer" controls style="width:100%; height:20px; margin-top:3px; filter:invert(0.9); outline:none; display:none;"></audio>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coherence & Slice Nav Bar -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; padding-top:4px; border-top:1px solid rgba(255,255,255,0.08);">
+                            <div style="font-size:10px; font-family:var(--font-mono);">
+                                Koherencia: <b id="ytCoherence" style="color:var(--green);">96% KOHERENS</b>
+                                <span id="ytBindingStatus" style="color:var(--text-dim); margin-left:4px; font-size:8px;">[Horgonyzott hármas]</span>
+                            </div>
+                            <div style="display:flex; gap:4px; align-items:center;">
+                                <button class="btn-sci" style="padding:1px 6px; font-size:9px;" onclick="stepYouTubeSlice(-1)">⏪ Előző</button>
+                                <span id="ytSliceIndex" style="font-family:var(--font-mono); font-size:9px; color:var(--cyan);">1 / 74</span>
+                                <button class="btn-sci" style="padding:1px 6px; font-size:9px;" onclick="stepYouTubeSlice(1)">⏩ Következő</button>
+                                <span style="color:var(--text-dim); font-size:9px; margin-left:6px;">⏱️</span>
+                                <input type="number" id="ytJumpSec" placeholder="mp (pl. 30)" style="width:65px; background:rgba(0,0,0,0.5); border:1px solid rgba(0,240,255,0.3); color:#fff; font-size:9px; padding:2px 4px; border-radius:3px; font-family:var(--font-mono);">
+                                <button class="btn-sci" style="padding:1px 6px; font-size:9px; border-color:var(--cyan); color:var(--cyan);" onclick="jumpYtTime()">Ugrás</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <div style="background:rgba(0,0,0,0.35); padding:8px; border-radius:6px; border:1px solid rgba(168,85,247,0.25);">
+                            <div style="font-size:10px; color:var(--purple); text-transform:uppercase; letter-spacing:0.5px; font-family:var(--font-mono); font-weight:bold;">
+                                🧠 A ΔP-42-ben Megfogalmazódott Kérdés (PFC — Qwen2.5-1.5B):
+                            </div>
+                            <div id="forageQuestion" style="font-size:12px; font-weight:bold; color:var(--cyan); margin-top:3px; min-height:18px;">
+                                "Várakozás a videó ingerére..."
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; font-family:var(--font-mono); color:var(--text-dim); padding:0 2px;">
+                            <span>🌐 Hálózati keresési kifejezés: <b id="forageQuery" style="color:var(--amber);">—</b></span>
+                            <button class="btn-sci" style="padding:2px 6px; font-size:9px;" onclick="sendAction('ask_web')">Közvetlen Kérdezés</button>
+                        </div>
+
+                        <div id="forageSummary" style="font-size:11px; line-height:1.45; color:var(--text-main); max-height:75px; overflow-y:auto; background:rgba(0,0,0,0.25); padding:6px 8px; border-radius:4px; border:1px solid rgba(255,255,255,0.08); font-family:var(--font-sans);">
+                            Nincs aktív hálózati kutatási adat.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cognitive Labyrinth & Autonomous Problem Solving Arena -->
+                <div class="panel" style="padding:10px; border-color:rgba(0,240,255,0.3); background:rgba(18,22,36,0.85); margin-bottom:8px;">
+                    <div class="panel-header" style="margin-bottom:6px;">
+                        <span class="panel-title" style="color:var(--cyan);">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            🧩 Kognitív Labirintus & Problémamegoldó Aréna (Nulla Hardkód)
+                        </span>
+                        <span id="labStatusBadge" style="font-size:10px; padding:2px 8px; border-radius:4px; background:rgba(255,0,85,0.15); border:1px solid rgba(255,0,85,0.3); color:var(--red); font-family:var(--font-mono);">
+                            🔒 ZÁRT ZSILIP (KÉRDÉS SZÜKSÉGES)
+                        </span>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:13px;">
+                        <div>
+                            <select id="labPuzzleSelect" class="chat-input" style="font-size:13px; font-weight:bold; padding:6px 10px; width:auto; border-radius:6px; background:rgba(6, 12, 28, 0.95);" onchange="selectLabPuzzle(this.value)">
+                                <option value="puzzle_5whys">1. Rejtvény: Leállt Generátor (5 Miért)</option>
+                                <option value="puzzle_polya">2. Rejtvény: Szakadék Áthidalás (Polya Heurisztika)</option>
+                                <option value="puzzle_einstein">3. Rejtvény: Einstein — Kié a hal? (Tézis & Falszifikáció)</option>
+                            </select>
+                        </div>
+                        <div style="font-family:var(--font-mono); font-size:13px; color:var(--text-dim);">
+                            Mélység: <b id="labDepth" style="color:var(--cyan); font-size:14px;">0 / 4</b> | Disszonancia: <b id="labDiss" style="color:var(--amber); font-size:14px;">0.85</b>
+                        </div>
+                    </div>
+
+                    <div id="labDesc" style="font-size:14px; color:#ffffff; font-weight:600; background:rgba(0,0,0,0.4); padding:10px 14px; border-radius:6px; border:1px solid rgba(0,240,255,0.3); margin-bottom:8px; line-height:1.5;">
+                        Egy kritikus energiagenerátor leállt és füstöl. Vak újraindításnál leég! Hogyan deríted ki a gyökérokot?
+                    </div>
+
+                    <div id="labLog" style="font-size:13px; color:#bbf7d0; font-weight:600; font-family:var(--font-mono); background:rgba(0,0,0,0.5); padding:10px 14px; border-radius:6px; min-height:28px; margin-bottom:10px; line-height:1.4;">
+                        A zsilip zárva van. Kérdezz az okokról az előrejutáshoz!
+                    </div>
+
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-sci btn-hot" style="flex:1; font-size:13px; font-weight:bold;" onclick="sendActionBtn(this, 'labyrinth_blind')">❌ Vak Próbálkozás</button>
+                        <button class="btn-sci" style="flex:1.4; font-size:13px; font-weight:bold; border-color:var(--cyan); color:var(--cyan);" onclick="askLabyrinth()">💡 Kérdezés / Tézis Tesztelése</button>
+                        <button class="btn-sci" style="flex:1.2; font-size:13px; font-weight:bold; border-color:var(--purple); color:#d8b4fe;" onclick="sendActionBtn(this, 'ask_web', {question: 'hibakeresés gyökérok elemzés módszertan'})">🌐 Módszer Keresése a Neten</button>
+                    </div>
+                </div>
+
+                <!-- Sovereign Cognitive Gymnasium & Real-World Challenge Arena -->
+                <div class="panel" style="padding:10px; border-color:rgba(168,85,247,0.4); background:rgba(16,20,38,0.9); margin-bottom:8px;">
+                    <div class="panel-header" style="margin-bottom:6px;">
+                        <span class="panel-title" style="color:#d8b4fe; font-size:13px; font-weight:bold;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-2.34"/><path d="M14 14.66V17c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.34"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                            🥊 Kognitív Edzőterem & Éles Kihívás-Aréna (Aktív Érvelés & Kiskapuk)
+                        </span>
+                        <span id="gymPhaseBadge" style="font-size:10px; padding:2px 8px; border-radius:4px; background:rgba(0,255,157,0.1); border:1px solid rgba(0,255,157,0.3); color:var(--green); font-family:var(--font-mono);">
+                            KÉSZENLÉTBEN
+                        </span>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px;">
+                        <div style="flex:1;">
+                            <select id="gymChallengeSelect" class="chat-input" style="font-size:12px; font-weight:bold; padding:6px 8px; width:100%; border-radius:6px; background:rgba(6, 12, 28, 0.95); border-color:rgba(168,85,247,0.4);">
+                                <option value="kresz_exception">1. KRESZ Kiskapu: Behajtani Tilos — Kivéve Engedéllyel / BKV</option>
+                                <option value="physics_cavitation">2. Gépészeti Kavitáció: Szivattyú Nyomásvesztés & Bernoulli</option>
+                                <option value="einstein_gravity">3. Einstein Dogma vs. LIGO Gravitációs Hullám Fénysebesség</option>
+                                <option value="surgical_precision">4. Sebészeti Mikroprecizitás: Csúszásmentes Érfogás (Super-PID)</option>
+                            </select>
+                        </div>
+                        <button class="btn-sci" style="font-size:12px; font-weight:bold; border-color:var(--purple); color:#d8b4fe; padding:6px 14px; white-space:nowrap;" onclick="startGymChallenge()">
+                            ⚡ Kihívás Indítása
+                        </button>
+                    </div>
+
+                    <div style="background:rgba(0,0,0,0.4); padding:8px 10px; border-radius:6px; border:1px solid rgba(168,85,247,0.25); margin-bottom:6px;">
+                        <div style="font-size:10px; color:var(--purple); font-weight:bold; font-family:var(--font-mono);">
+                            🎯 Hipotézis & Kutatási Fókusz:
+                        </div>
+                        <div id="gymHypothesis" style="font-size:12px; color:var(--cyan); font-weight:600; margin-top:2px;">
+                            Válassz egy kihívást és indítsd el a kognitív edzést!
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(0,0,0,0.4); padding:8px 10px; border-radius:6px; border:1px solid rgba(0,255,157,0.25);">
+                        <div style="font-size:10px; color:var(--green); font-weight:bold; font-family:var(--font-mono);">
+                            💡 Megtalált Kiskapu & Szintetizált Megoldás:
+                        </div>
+                        <div id="gymSolution" style="font-size:12px; color:#ffffff; font-weight:600; margin-top:2px; line-height:1.4;">
+                            Nincs aktív lezárt kihívás.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6 GGUF Model Cortical Chorus Grid -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/></svg>
+                            Kérgi Kórus — 6 Valós GGUF Modell az RTX 5070-en
+                        </span>
+                        <span class="panel-chip">CUDA VRAM: 2.88 GB</span>
+                    </div>
+
+                    <div class="roster-grid">
+                        <div class="roster-card" id="r_pfc">
+                            <div class="r-title"><span>PFC Tervező</span><span class="dot-pulse" style="width:6px; height:6px;"></span></div>
+                            <div class="r-model">Qwen2.5-1.5B</div>
+                            <div class="r-meta"><span>Lat: <b id="lat_pfc">42 ms</b></span><span>Runs: <b id="run_pfc">0</b></span></div>
+                        </div>
+                        <div class="roster-card" id="r_inner">
+                            <div class="r-title"><span>Belső Beszéd</span><span class="dot-pulse" style="width:6px; height:6px;"></span></div>
+                            <div class="r-model">Qwen2.5-0.5B</div>
+                            <div class="r-meta"><span>Lat: <b id="lat_inner">18 ms</b></span><span>Runs: <b id="run_inner">0</b></span></div>
+                        </div>
+                        <div class="roster-card" id="r_social">
+                            <div class="r-title"><span>Szociális Tükör</span><span class="dot-pulse" style="width:6px; height:6px;"></span></div>
+                            <div class="r-model">Llama-3.2-1B</div>
+                            <div class="r-meta"><span>Lat: <b id="lat_social">31 ms</b></span><span>Runs: <b id="run_social">0</b></span></div>
+                        </div>
+                        <div class="roster-card" id="r_critic">
+                            <div class="r-title"><span>Kétely & Jutalom</span><span class="dot-pulse" style="width:6px; height:6px;"></span></div>
+                            <div class="r-model">SmolLM2-360M</div>
+                            <div class="r-meta"><span>Lat: <b id="lat_critic">12 ms</b></span><span>Runs: <b id="run_critic">0</b></span></div>
+                        </div>
+                        <div class="roster-card" id="r_motor">
+                            <div class="r-title"><span>Szenzomotor Kódoló</span><span class="dot-pulse" style="width:6px; height:6px;"></span></div>
+                            <div class="r-model">Qwen2.5-0.5B</div>
+                            <div class="r-meta"><span>Lat: <b id="lat_motor">19 ms</b></span><span>Runs: <b id="run_motor">0</b></span></div>
+                        </div>
+                        <div class="roster-card" id="r_dream">
+                            <div class="r-title"><span>Tudatalatti Álom</span><span class="dot-pulse" style="width:6px; height:6px;"></span></div>
+                            <div class="r-model">all-MiniLM-L6</div>
+                            <div class="r-meta"><span>Lat: <b id="lat_dream">8 ms</b></span><span>Runs: <b id="run_dream">0</b></span></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Maslow, Memory & Trigger Deck -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                        Maslow 5D & Szimulációs Deck
+                    </span>
+                    <span class="panel-chip" id="maslowDomTag">DOMINÁNS: MEGISMERÉS</span>
+                </div>
+
+                <!-- Maslow Vectors -->
+                <div class="maslow-stack">
+                    <div class="m-row">
+                        <span>1. Metabolizmus</span>
+                        <div class="m-bar-bg"><div class="m-bar-fill" id="mFill0" style="width:10%;"></div></div>
+                        <span id="mVal0">0.10</span>
+                    </div>
+                    <div class="m-row">
+                        <span>2. Biztonságérzet</span>
+                        <div class="m-bar-bg"><div class="m-bar-fill" id="mFill1" style="width:15%;"></div></div>
+                        <span id="mVal1">0.15</span>
+                    </div>
+                    <div class="m-row">
+                        <span>3. Társas Kapcsolat</span>
+                        <div class="m-bar-bg"><div class="m-bar-fill" id="mFill2" style="width:30%;"></div></div>
+                        <span id="mVal2">0.30</span>
+                    </div>
+                    <div class="m-row">
+                        <span>4. Kompetencia</span>
+                        <div class="m-bar-bg"><div class="m-bar-fill" id="mFill3" style="width:25%;"></div></div>
+                        <span id="mVal3">0.25</span>
+                    </div>
+                    <div class="m-row">
+                        <span>5. Megismerés</span>
+                        <div class="m-bar-bg"><div class="m-bar-fill" id="mFill4" style="width:60%; background:linear-gradient(90deg, #a855f7, #00f0ff);"></div></div>
+                        <span id="mVal4">0.60</span>
+                    </div>
+                </div>
+
+                <!-- Subcortical & Memory Stats -->
+                <div class="audio-substats">
+                    <div class="substat"><div>Motor a_motor:</div><b id="valAmotor">0.85 (GO)</b></div>
+                    <div class="substat"><div>Illemkorlát Δθ:</div><b id="valEtiquette">+0.00°</b></div>
+                    <div class="substat"><div>Amigdala Reflex:</div><b id="valAmygdala" style="color:var(--green);">INAKTÍV (&le;2ms)</b></div>
+                    <div class="substat"><div>RAM C(t) Puffer:</div><b id="valMemSat">0.05</b></div>
+                    <div class="substat"><div>SQLite WAL:</div><b id="valWalCount">0 rekord</b></div>
+                    <div class="substat"><div>CDC Ring Puffer:</div><b id="valCdc">0/65536</b></div>
+                </div>
+
+                <!-- Interactive Simulation Trigger Deck -->
+                <div class="panel-header" style="margin-top:6px;">
+                    <span class="panel-title" style="color:var(--amber); font-size:13px;">⚡ Gondozói & Szenzoros Inger-Vezérlőpult</span>
+                    <span class="panel-chip" style="color:var(--green); border-color:rgba(0,255,157,0.3);">ÉLŐ INTERAKCIÓ</span>
+                </div>
+
+                <!-- Live Action & Reaction Box -->
+                <div id="liveReactionBox" class="live-reaction-box">
+                    <div class="l-reac-header">
+                        <span class="dot-pulse" style="width:7px; height:7px;"></span>
+                        <span>🤖 ΔP-42 ÉLŐ REAKCIÓ MONITOR</span>
+                        <span id="liveActionTime" style="margin-left:auto; font-size:11px; color:var(--text-dim);">Készenlétben</span>
+                    </div>
+                    <div id="liveActionTitle" class="l-reac-title">Készen áll a parancsokra</div>
+                    <div id="liveActionContent" class="l-reac-body">Kattints bármelyik gombra alább — a neurális mag reakciója azonnal megjelenik itt és a felső értesítőben is!</div>
+                </div>
+
+                <div class="action-grid">
+                    <button class="btn-sci btn-praise" onclick="sendActionBtn(this, 'praise')">👍 Dicséret</button>
+                    <button class="btn-sci btn-scold" onclick="sendActionBtn(this, 'scold')">⚠️ Szidás</button>
+                    <button class="btn-sci btn-feed" onclick="sendActionBtn(this, 'feed')">🍎 Etetés</button>
+                    <button class="btn-sci btn-tactile" onclick="sendActionBtn(this, 'touch', {touch_type: 'kedves simogatás'})">🖐️ Simogatás</button>
+                    <button class="btn-sci btn-glass" onclick="sendActionBtn(this, 'grasp')">🍵 Pohár Fogás</button>
+                    <button class="btn-sci btn-slip" onclick="sendActionBtn(this, 'slip')">🧼 Csúszós Pohár</button>
+                    <button class="btn-sci btn-hot" onclick="sendActionBtn(this, 'hot')">☕ Forró Csésze</button>
+                    <button class="btn-sci btn-threat" onclick="sendActionBtn(this, 'threat')">🚨 Életveszély</button>
+                    <button class="btn-sci btn-massage" onclick="sendActionBtn(this, 'massage')">💆 Masszázs</button>
+                    <button class="btn-sci btn-sleep" onclick="sendActionBtn(this, 'sleep')">🌙 REM Alvás</button>
+                    <button class="btn-sci btn-video" onclick="sendActionBtn(this, 'watch_video')">🎬 Videó Vetítés</button>
+                    <button class="btn-sci btn-web" onclick="sendActionBtn(this, 'ask_web')">🌐 Netes Keresés</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- BOTTOM SPLIT: Inner Speech vs Caretaker Interactive Chat -->
+        <div class="bottom-split">
+            
+            <!-- Left: Inner Voice & Spontaneous Cognition -->
+            <div class="panel" style="min-height:220px;">
+                <div class="panel-header">
+                    <span class="panel-title" style="color:#bbf7d0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Belső Hang & Prefrontális Célok (Spontán Kogníció az RTX 5070-en)
+                    </span>
+                    <span class="panel-chip" style="color:var(--green); border-color:rgba(0,255,157,0.3);">INNER MONOLOGUE</span>
+                </div>
+
+                <div class="stream-scroll" id="innerVoiceStream">
+                    <div class="msg-line msg-inner-voice">
+                        <span style="font-size:9px; color:var(--text-dim);">[T+0.0s — Ébredés]:</span>
+                        <div>🧠 Belső Beszéd: "Awakening into physical reality. A környezet stabil, a homeosztázis felépül."</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Caretaker Interaction Channel -->
+            <div class="panel" style="min-height:220px;">
+                <div class="panel-header">
+                    <span class="panel-title" style="color:var(--cyan);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        Gondozói Interakció & Élő Párbeszéd Csatorna
+                    </span>
+                    <span class="panel-chip">CARETAKER TERMINAL</span>
+                </div>
+
+                <div class="stream-scroll" id="caretakerChatStream">
+                    <div class="msg-line msg-caretaker-text">
+                        <span style="font-size:9px; color:var(--text-dim);">Rendszer:</span>
+                        <div>👤 Gondozó: [Csatlakozva a kognitív konzolhoz. Kommunikáció a ΔP-42 kognitív maggal!]</div>
+                    </div>
+                </div>
+
+                <form class="chat-bar" onsubmit="submitCaretakerSpeech(event)">
+                    <input type="text" id="chatInputBox" class="chat-input" placeholder="Üzenet a ΔP-42 kognitív magnak (pl. 'Elemezd az univerzum tágulását!')..." autocomplete="off">
+                    <button type="submit" class="btn-send">KÜLDÉS</button>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Client-Side Engine Script -->
+    <script>
+        let ws = null;
+        const thetaBuffer = [];
+        const maxBufferSize = 250;
+
+        let lastInner = '';
+        let lastStrategy = '';
+        let lastCaretaker = '';
+        let lastResponse = '';
+
+        let classroomState = null;
+
+        function initWS() {
+            const loc = window.location;
+            const wsProto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+            const url = `${wsProto}//${loc.host}/ws/telemetry`;
+
+            ws = new WebSocket(url);
+
+            ws.onopen = () => {
+                document.getElementById('wsDot').style.background = 'var(--green)';
+                document.getElementById('wsStatus').innerText = 'LIVE (50Hz)';
+                document.getElementById('wsStatus').style.color = 'var(--green)';
+            };
+
+            ws.onmessage = (e) => {
+                try {
+                    const snap = JSON.parse(e.data);
+                    renderTelemetry(snap);
+                } catch (err) {
+                    console.error('JSON Error:', err);
+                }
+            };
+
+            ws.onclose = () => {
+                document.getElementById('wsDot').style.background = 'var(--red)';
+                document.getElementById('wsStatus').innerText = 'RECONNECT...';
+                document.getElementById('wsStatus').style.color = 'var(--red)';
+                setTimeout(initWS, 2000);
+            };
+
+            ws.onerror = (err) => {
+                ws.close();
+            };
+        }
+
+        function renderTelemetry(snap) {
+            // Header
+            document.getElementById('topVram').innerText = `${Math.round(snap.vram_mb || 2879)} MB`;
+            const stageNames = { 1: "1. Bölcsőde", 2: "2. Óvoda", 3: "3. Iskola" };
+            document.getElementById('topStage').innerText = stageNames[snap.stage] || snap.stage;
+
+            const isSleeping = snap.is_sleeping || false;
+            const topCircadian = document.getElementById('topCircadian');
+            const circPill = document.getElementById('circadianPill');
+            if (isSleeping) {
+                topCircadian.innerText = "ÁLOM (REM FÁZIS)";
+                topCircadian.style.color = "var(--purple)";
+                circPill.style.borderColor = "var(--purple)";
+            } else {
+                topCircadian.innerText = "ÉBREN";
+                topCircadian.style.color = "var(--green)";
+                circPill.style.borderColor = "var(--green)";
+            }
+
+            // 5-Step Bottleneck Audit
+            const trace = snap.bottleneck_trace || {};
+            setStepClass('step_mic', trace.mic_ok);
+            setStepClass('step_thalamus', trace.thalamus_pass);
+            setStepClass('step_theta', trace.theta_pass);
+            setStepClass('step_etiquette', trace.etiquette_pass);
+            setStepClass('step_motor', trace.motor_pass);
+
+            const bText = document.getElementById('bottleneckText');
+            bText.innerText = snap.bottleneck_reason || 'OK';
+            if (snap.bottleneck_reason && snap.bottleneck_reason.includes('GO')) {
+                bText.style.color = 'var(--green)';
+            } else if (snap.bottleneck_reason && (snap.bottleneck_reason.includes('VÉSZFÉK') || snap.bottleneck_reason.includes('NO-GO'))) {
+                bText.style.color = 'var(--red)';
+            } else {
+                bText.style.color = 'var(--amber)';
+            }
+
+            // Classroom & Teacher HUD
+            if (snap.teacher) {
+                const isPaused = !!snap.teacher.is_paused;
+                teacherIsPaused = isPaused;
+                const hudStatus = document.getElementById('hudTeacherStatus');
+                const btnToggle = document.getElementById('btnTeacherToggle');
+                if (hudStatus) {
+                    hudStatus.innerText = snap.teacher.status || 'Vezeti a tanórát...';
+                    hudStatus.style.color = isPaused ? 'var(--amber)' : '#ffffff';
+                }
+                if (btnToggle) {
+                    btnToggle.innerText = isPaused ? '▶️ Nevelő Indítása' : '⏸️ Csendesítés (Standby)';
+                    btnToggle.style.borderColor = isPaused ? 'var(--green)' : 'var(--amber)';
+                    btnToggle.style.color = isPaused ? 'var(--green)' : 'var(--amber)';
+                }
+            }
+            if (snap.classroom) {
+                classroomState = snap.classroom;
+                const chip = document.getElementById('taskNameChip');
+                if (chip && snap.classroom.task_name) {
+                    chip.innerText = snap.classroom.task_name.toUpperCase();
+                }
+            }
+
+            // Audio & Microphone VU-Meter
+            const audioDb = snap.audio_level_db || -54.0;
+            document.getElementById('audioDbReadout').innerText = `${audioDb.toFixed(1)} dB`;
+            const vuNorm = Math.min(100, Math.max(5, ((audioDb + 60.0) / 60.0) * 100));
+            document.getElementById('vuBarFill').style.width = `${vuNorm}%`;
+
+            const vadActive = snap.vad_active || false;
+            const vadTag = document.getElementById('vadStatusTag');
+            if (vadActive) {
+                vadTag.innerText = "🎤 BESZÉD ÉSZLELVE";
+                vadTag.style.color = "var(--cyan)";
+            } else {
+                vadTag.innerText = "CSEND";
+                vadTag.style.color = "var(--text-dim)";
+            }
+
+            const isAudioPing = (snap.delta || 0) >= (snap.epsilon || 0.15);
+            const pingEl = document.getElementById('audioPingReadout');
+            if (isAudioPing) {
+                pingEl.innerText = "PING! (AKTÍV ÉSZLELÉS)";
+                pingEl.style.color = "var(--cyan)";
+            } else {
+                pingEl.innerText = "COMPUTE BYPASS";
+                pingEl.style.color = "var(--text-dim)";
+            }
+
+            // Tactile 5-Fingers & Grip
+            const fingers = snap.tactile_fingers || [0, 0, 0, 0, 0];
+            let totalGrip = 0;
+            for (let i = 0; i < 5; i++) {
+                const fN = fingers[i] || 0.0;
+                totalGrip += fN;
+                const fBar = document.getElementById(`fBar${i}`);
+                const fVal = document.getElementById(`fVal${i}`);
+                if (fBar) fBar.style.width = `${Math.min(100, (fN / 20.0) * 100)}%`;
+                if (fVal) fVal.innerText = `${fN.toFixed(1)} N`;
+            }
+            document.getElementById('totalGripVal').innerText = `${totalGrip.toFixed(1)} N`;
+            const slip = snap.slip_velocity || 0.0;
+            document.getElementById('slipVal').innerText = `${slip.toFixed(2)} m/s`;
+            const gripTag = document.getElementById('gripStatusTag');
+            if (slip > 0.1) {
+                gripTag.innerText = "CSÚSZIK A POHÁR!";
+                gripTag.style.color = "var(--amber)";
+            } else if (totalGrip > 2.0) {
+                gripTag.innerText = "STABIL FOGÁS";
+                gripTag.style.color = "var(--green)";
+            } else {
+                gripTag.innerText = "SZABAD";
+                gripTag.style.color = "var(--text-dim)";
+            }
+
+            // Thalamus DSP
+            document.getElementById('tDelta').innerText = (snap.delta || 0).toFixed(3);
+            document.getElementById('tEps').innerText = (snap.epsilon || 0.15).toFixed(3);
+            document.getElementById('tGain').innerText = `${(snap.g_agc || 1.0).toFixed(2)}x`;
+            document.getElementById('tBeta').innerText = (snap.beta_syn || 0.10).toFixed(2);
+            document.getElementById('thalamusState').innerText = snap.thalamus_state || 'BYPASS';
+
+            // Dynamic Neural Core & Super-PID HUD
+            const dyn = snap.dynamic_core || {};
+            const synEl = document.getElementById('coreSynCount');
+            const hEl = document.getElementById('coreHnorm');
+            const pidEl = document.getElementById('corePidOut');
+            const plastEl = document.getElementById('corePlasticity');
+            const varEl = document.getElementById('coreVarRed');
+            const amEl = document.getElementById('coreAmotor');
+            if (synEl) synEl.innerText = (dyn.synapse_count || 43152).toLocaleString();
+            if (hEl) hEl.innerText = (dyn.h_norm || 0).toFixed(3);
+            if (pidEl) {
+                const pVal = dyn.super_pid_out || 0;
+                pidEl.innerText = (pVal >= 0 ? '+' : '') + pVal.toFixed(3);
+            }
+            if (plastEl) plastEl.innerText = (dyn.plasticity_delta || 0).toFixed(3);
+            if (varEl) varEl.innerText = `${(dyn.variance_reduction_pct || 0).toFixed(1)}%`;
+            if (amEl) amEl.innerText = (dyn.a_motor_core || 0).toFixed(2);
+
+            // Center Column: Pacemaker
+            const theta = snap.theta_deg || 15.0;
+            const dotTheta = snap.dot_theta || 0.0;
+            document.getElementById('scopeTheta').innerText = `${theta.toFixed(2)}°`;
+            document.getElementById('scopeDotTheta').innerText = `${dotTheta >= 0 ? '+' : ''}${dotTheta.toFixed(2)} rad/s`;
+            document.getElementById('scopeKuramoto').innerText = (snap.kuramoto_r || 0.85).toFixed(3);
+
+            thetaBuffer.push(theta);
+            if (thetaBuffer.length > maxBufferSize) thetaBuffer.shift();
+
+            // Dream Theater Visor
+            const atonia = snap.atonia_locked || false;
+            const atoniaEl = document.getElementById('atoniaLockTag');
+            if (atonia) {
+                atoniaEl.innerText = "MOTOROS ATONIA: RETESZELVE (ÁLOM)";
+                atoniaEl.style.color = "var(--purple)";
+                atoniaEl.style.borderColor = "var(--purple)";
+                atoniaEl.style.background = "rgba(168, 85, 247, 0.15)";
+            } else {
+                atoniaEl.innerText = "MOTOROS ATONIA: FELOLDVA (ÉBREN)";
+                atoniaEl.style.color = "var(--green)";
+                atoniaEl.style.borderColor = "rgba(0,255,157,0.3)";
+                atoniaEl.style.background = "rgba(0,255,157,0.1)";
+            }
+            document.getElementById('dreamText').innerText = snap.dream_content || 'Nincs aktív álom (ébrenléti állapot).';
+            document.getElementById('dVerdict').innerText = snap.last_dream_verdict || 'APPROVED';
+            document.getElementById('dLoss').innerText = (snap.last_dream_delta_ratio || 0).toFixed(4);
+
+            // Epistemic Web Forager HUD
+            const epistemic = snap.epistemic || {};
+            const qEl = document.getElementById('forageQuestion');
+            const queryEl = document.getElementById('forageQuery');
+            const summaryEl = document.getElementById('forageSummary');
+            const badgeEl = document.getElementById('forageStatusBadge');
+
+            if (badgeEl) {
+                if (epistemic.is_foraging) {
+                    badgeEl.innerText = "🌐 KERESÉS A WEBEN...";
+                    badgeEl.style.color = "var(--cyan)";
+                    badgeEl.style.borderColor = "var(--cyan)";
+                    badgeEl.style.background = "rgba(0,240,255,0.15)";
+                } else if (epistemic.total_searches > 0) {
+                    badgeEl.innerText = `✅ TUDÁS BEÉGETVE (${epistemic.total_searches})`;
+                    badgeEl.style.color = "var(--green)";
+                    badgeEl.style.borderColor = "rgba(0,255,157,0.3)";
+                    badgeEl.style.background = "rgba(0,255,157,0.1)";
+                }
+            }
+
+            if (epistemic.last_question && qEl) {
+                qEl.innerText = `"${epistemic.last_question}"`;
+            }
+            if (epistemic.last_query && queryEl) {
+                queryEl.innerText = epistemic.last_query;
+            }
+            if (epistemic.last_summary && summaryEl) {
+                summaryEl.innerText = epistemic.last_summary;
+            }
+
+            // YouTube Multimodal Grounding HUD
+            const yt = snap.youtube || {};
+            const ytTitle = document.getElementById('ytTitle');
+            const ytFrame = document.getElementById('ytLiveFrame');
+            const ytTime = document.getElementById('ytTimeBadge');
+            const ytText = document.getElementById('ytTranscriptText');
+            const ytRms = document.getElementById('ytRmsVal');
+            const ytSpeech = document.getElementById('ytSpeechStatus');
+            const ytCoh = document.getElementById('ytCoherence');
+            const ytBind = document.getElementById('ytBindingStatus');
+            const ytSliceIdx = document.getElementById('ytSliceIndex');
+            const ytAudio = document.getElementById('ytAudioPlayer');
+
+            if (yt.title && ytTitle) ytTitle.innerText = yt.title;
+            if (yt.timestamp_str && ytTime) ytTime.innerText = yt.timestamp_str;
+            if (yt.text && ytText) ytText.innerText = `« ${yt.text} »`;
+            const fUrl = yt.frame_url || yt.frame_b64 || yt.thumbnail_url;
+            if (fUrl && ytFrame) ytFrame.src = fUrl;
+
+            if (yt.audio_metrics) {
+                if (ytRms) ytRms.innerText = yt.audio_metrics.rms || 0;
+                if (ytSpeech) {
+                    ytSpeech.innerText = yt.audio_metrics.speech_detected ? 'BESZÉD ÉSZLELVE' : 'CSEND / ZAJ';
+                    ytSpeech.style.color = yt.audio_metrics.speech_detected ? 'var(--green)' : 'var(--amber)';
+                }
+            }
+            const aUrl = yt.audio_url || yt.audio_b64;
+            if (aUrl && ytAudio) {
+                if (ytAudio.getAttribute('data-src') !== aUrl) {
+                    ytAudio.setAttribute('data-src', aUrl);
+                    ytAudio.src = aUrl;
+                    ytAudio.style.display = 'block';
+                }
+            }
+            if (yt.waveform) {
+                drawYtWaveform(yt.waveform);
+            }
+            if (yt.coherence_score !== undefined && ytCoh) {
+                const cPct = Math.round(yt.coherence_score * 100);
+                ytCoh.innerText = `${cPct}% KOHERENS`;
+                ytCoh.style.color = cPct > 80 ? 'var(--green)' : 'var(--amber)';
+            }
+            if (yt.status_text && ytBind) ytBind.innerText = `[${yt.status_text}]`;
+            if (ytSliceIdx && yt.total_snippets) {
+                ytSliceIdx.innerText = `${(yt.snippet_index || 0) + 1} / ${yt.total_snippets}`;
+            }
+
+            // Cognitive Labyrinth HUD
+            const lab = snap.labyrinth || {};
+            const lBadge = document.getElementById('labStatusBadge');
+            const lDepth = document.getElementById('labDepth');
+            const lDiss = document.getElementById('labDiss');
+            const lDesc = document.getElementById('labDesc');
+            const lLog = document.getElementById('labLog');
+            if (lDepth) lDepth.innerText = `${lab.current_depth || 0} / ${lab.max_depth || 4}`;
+            if (lDiss) lDiss.innerText = (lab.dissonance || 0.85).toFixed(2);
+            if (lDesc && lab.description) lDesc.innerText = lab.description;
+            if (lLog && lab.last_log) lLog.innerText = lab.last_log;
+            if (lBadge) {
+                if (lab.is_solved) {
+                    lBadge.innerText = "🎉 NYITOTT ZSILIP (MEGOLDVA!)";
+                    lBadge.style.color = "var(--green)";
+                    lBadge.style.borderColor = "rgba(0,255,157,0.3)";
+                    lBadge.style.background = "rgba(0,255,157,0.15)";
+                } else if (lab.current_depth > 0) {
+                    lBadge.innerText = `🔓 RÉSZLEGESEN FELOLDVA (${lab.current_depth}. szint)`;
+                    lBadge.style.color = "var(--cyan)";
+                    lBadge.style.borderColor = "rgba(0,240,255,0.3)";
+                    lBadge.style.background = "rgba(0,240,255,0.15)";
+                } else {
+                    lBadge.innerText = "🔒 ZÁRT ZSILIP (KÉRDÉS SZÜKSÉGES)";
+                    lBadge.style.color = "var(--red)";
+                    lBadge.style.borderColor = "rgba(255,0,85,0.3)";
+                    lBadge.style.background = "rgba(255,0,85,0.15)";
+                }
+            }
+
+            // Cognitive Gymnasium HUD
+            const gym = snap.gymnasium || {};
+            const gBadge = document.getElementById('gymPhaseBadge');
+            const gHypo = document.getElementById('gymHypothesis');
+            const gSol = document.getElementById('gymSolution');
+            if (gBadge && gym.current_phase) {
+                gBadge.innerText = gym.current_phase;
+                if (gym.is_running) {
+                    gBadge.style.color = "var(--cyan)";
+                    gBadge.style.borderColor = "var(--cyan)";
+                    gBadge.style.background = "rgba(0,240,255,0.15)";
+                } else if (gym.total_completed > 0) {
+                    gBadge.style.color = "var(--green)";
+                    gBadge.style.borderColor = "rgba(0,255,157,0.3)";
+                    gBadge.style.background = "rgba(0,255,157,0.15)";
+                } else {
+                    gBadge.style.color = "var(--green)";
+                    gBadge.style.borderColor = "rgba(0,255,157,0.3)";
+                    gBadge.style.background = "rgba(0,255,157,0.1)";
+                }
+            }
+            if (gHypo && gym.hypothesis) gHypo.innerText = gym.hypothesis;
+            if (gSol && gym.synthesized_solution) gSol.innerText = gym.synthesized_solution;
+
+            // 6 GGUF Models
+            const workers = snap.workers || {};
+            const wMap = { "pfc": "pfc", "inner_speech": "inner", "social_mirror": "social", "doubt_critic": "critic", "sensorimotor": "motor", "dream_embedding": "dream" };
+            for (const [sub, k] of Object.entries(wMap)) {
+                const w = workers[sub] || {};
+                const latEl = document.getElementById(`lat_${k}`);
+                const runEl = document.getElementById(`run_${k}`);
+                const cardEl = document.getElementById(`r_${k}`);
+                if (latEl) latEl.innerText = `${(w.last_latency_ms || 0).toFixed(0)} ms`;
+                if (runEl) runEl.innerText = w.total_inferences || 0;
+                if (cardEl) {
+                    if (w.queue_depth > 0) cardEl.classList.add('busy');
+                    else cardEl.classList.remove('busy');
+                }
+            }
+
+            // Right Column: Maslow
+            const maslow = snap.maslow_v || [0.1, 0.15, 0.3, 0.25, 0.6];
+            for (let i = 0; i < 5; i++) {
+                const v = maslow[i] || 0.0;
+                const fill = document.getElementById(`mFill${i}`);
+                const val = document.getElementById(`mVal${i}`);
+                if (fill) fill.style.width = `${Math.min(100, Math.max(5, v * 100))}%`;
+                if (val) val.innerText = v.toFixed(2);
+            }
+            const domNames = ["METABOLIZMUS", "BIZTONSÁG", "TÁRSAS", "KOMPETENCIA", "MEGISMERÉS"];
+            const maxIdx = maslow.indexOf(Math.max(...maslow));
+            document.getElementById('maslowDomTag').innerText = `DOMINÁNS: ${domNames[maxIdx]}`;
+
+            // Subcortical stats
+            const motorVal = snap.a_motor || 0.0;
+            document.getElementById('valAmotor').innerText = `${motorVal.toFixed(2)} (${motorVal >= 0.5 ? 'GO' : 'NO-GO'})`;
+            document.getElementById('valEtiquette').innerText = `+${(snap.etiquette_deg || 0).toFixed(2)}°`;
+            
+            const isEmerg = snap.emergency_active || false;
+            const amgEl = document.getElementById('valAmygdala');
+            if (isEmerg) {
+                amgEl.innerText = "RIASZTÁS! (VÉSZFÉK)";
+                amgEl.style.color = "var(--red)";
+            } else {
+                amgEl.innerText = "INAKTÍV (<=2ms)";
+                amgEl.style.color = "var(--green)";
+            }
+
+            document.getElementById('valMemSat').innerText = (snap.context_saturation || 0).toFixed(2);
+            document.getElementById('valWalCount').innerText = `${snap.persisted_episodes || 0} rekord`;
+            document.getElementById('valCdc').innerText = `${snap.cdc_size || 0}/${snap.cdc_capacity || 65536}`;
+
+            // Bottom Streams: Inner Voice
+            if (snap.inner_speech && snap.inner_speech !== lastInner) {
+                lastInner = snap.inner_speech;
+                lastStrategy = snap.pfc_strategy;
+                addInnerVoiceMsg(snap.inner_speech, snap.pfc_strategy);
+            }
+
+            // Bottom Streams: Caretaker
+            if (snap.last_caretaker && snap.last_caretaker !== '—' && snap.last_caretaker !== lastCaretaker) {
+                lastCaretaker = snap.last_caretaker;
+                lastResponse = snap.last_response;
+                addCaretakerTurnMsg(snap.last_caretaker, snap.last_response);
+            }
+        }
+
+        function setStepClass(id, isPass) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (isPass) el.className = 'b-step pass';
+            else el.className = 'b-step fail';
+        }
+
+        function addInnerVoiceMsg(speech, strategy) {
+            const stream = document.getElementById('innerVoiceStream');
+            const now = new Date().toLocaleTimeString();
+
+            const e1 = document.createElement('div');
+            e1.className = 'msg-line msg-inner-voice';
+            e1.innerHTML = `<span style="font-size:9px; color:var(--text-dim);">${now} — Belső Beszéd:</span><div>🧠 ${escapeHTML(speech)}</div>`;
+            stream.appendChild(e1);
+
+            if (strategy) {
+                const e2 = document.createElement('div');
+                e2.className = 'msg-line msg-pfc-strat';
+                e2.innerHTML = `<span style="font-size:9px; color:var(--text-dim);">${now} — PFC Cél:</span><div>🎯 ${escapeHTML(strategy)}</div>`;
+                stream.appendChild(e2);
+            }
+
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function addCaretakerTurnMsg(userTxt, childTxt) {
+            const stream = document.getElementById('caretakerChatStream');
+            if (!stream) return;
+            const now = new Date().toLocaleTimeString();
+
+            const eUser = document.createElement('div');
+            eUser.className = 'msg-line msg-caretaker-text';
+            eUser.innerHTML = `<span style="font-size:11px; color:var(--text-dim);">${now} — Gondozó/Tanító:</span><div style="font-size:14px; font-weight:600; margin-top:2px;">👤 ${escapeHTML(userTxt)}</div>`;
+            stream.appendChild(eUser);
+
+            if (childTxt && childTxt !== '—') {
+                const eChild = document.createElement('div');
+                eChild.className = 'msg-line msg-child-reply';
+                eChild.innerHTML = `<span style="font-size:11px; color:var(--text-dim);">${now} — ΔP-42 (RTX 5070):</span><div style="font-size:14px; font-weight:600; margin-top:2px; color:#bbf7d0;">🤖 "${escapeHTML(childTxt)}"</div>`;
+                stream.appendChild(eChild);
+            }
+
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        let toastTimeout = null;
+
+        function showActionToast(icon, title, desc, badge = "AKTÍV", isSuccess = true) {
+            const toast = document.getElementById('universalToast');
+            if (!toast) return;
+            document.getElementById('toastIcon').innerText = icon;
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastDesc').innerText = desc;
+            const bEl = document.getElementById('toastBadge');
+            bEl.innerText = badge;
+            bEl.style.borderColor = isSuccess ? 'var(--cyan)' : 'var(--red)';
+            bEl.style.color = isSuccess ? 'var(--cyan)' : 'var(--red)';
+            toast.style.borderColor = isSuccess ? 'var(--cyan)' : 'var(--red)';
+            toast.style.display = 'flex';
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 5500);
+        }
+
+        function updateLiveReactionBox(title, reaction, isSuccess = true) {
+            const box = document.getElementById('liveReactionBox');
+            const timeEl = document.getElementById('liveActionTime');
+            const titleEl = document.getElementById('liveActionTitle');
+            const bodyEl = document.getElementById('liveActionContent');
+            if (!box) return;
+
+            const nowStr = new Date().toLocaleTimeString();
+            if (timeEl) timeEl.innerText = nowStr;
+            if (titleEl) titleEl.innerText = title;
+            if (bodyEl) {
+                bodyEl.innerText = reaction;
+                bodyEl.style.color = isSuccess ? '#bbf7d0' : '#fecdd3';
+            }
+
+            box.classList.remove('reac-flash');
+            void box.offsetWidth; // Force CSS animation restart
+            box.classList.add('reac-flash');
+        }
+
+        function playFeedbackBeep(freq = 780, dur = 0.04) {
+            try {
+                const ctx = window.AudioContext || window.webkitAudioContext;
+                if (!ctx) return;
+                const audioCtx = new ctx();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + dur);
+            } catch (e) {
+                // Silently bypass if browser autoplay policy restricts AudioContext
+            }
+        }
+
+        async function sendAction(actName, params = {}, btnEl = null) {
+            playFeedbackBeep(780, 0.04);
+
+            if (btnEl) {
+                btnEl.classList.add('btn-active');
+                setTimeout(() => btnEl.classList.remove('btn-active'), 250);
+            }
+
+            const actIcons = {
+                'praise': '👍', 'scold': '⚠️', 'feed': '🍎', 'touch': '🖐️',
+                'grasp': '🍵', 'slip': '🧼', 'hot': '☕', 'threat': '🚨',
+                'massage': '💆', 'sleep': '🌙', 'watch_video': '🎬', 'ask_web': '🌐',
+                'pause_teacher': '⏸️', 'resume_teacher': '▶️',
+                'labyrinth_ask': '💡', 'labyrinth_blind': '❌', 'labyrinth_select': '🧩',
+                'set_task': '🎯', 'speak': '🗣️', 'youtube_jump_time': '⏱️', 'youtube_step': '⏩', 'youtube_ingest': '🎬'
+            };
+            const icon = actIcons[actName] || '⚡';
+
+            showActionToast(icon, `PARANCS: ${actName.toUpperCase()}`, 'Küldés az NVIDIA RTX 5070 neurális magnak...', '⏳ FOLYAMATBAN');
+
+            try {
+                const payload = { action: actName, ...params };
+                const res = await fetch('/api/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                console.log(`[Action: ${actName}] Res:`, data);
+
+                const msg = data.message || `Parancs végrehajtva: ${actName}`;
+                const reac = data.reaction || data.response || 'ΔP-42 kognitív magja sikeresen feldolgozta az ingert.';
+
+                // Show prominent toast with clear visual feedback
+                showActionToast(icon, `✅ ${msg}`, `🤖 REAKCIÓ: ${reac}`, 'SIKERES (OK)', true);
+
+                // Update live reaction card
+                updateLiveReactionBox(msg, reac, true);
+
+                // Add to Caretaker turn stream so history records it clearly
+                addCaretakerTurnMsg(`[Parancs]: ${msg}`, reac);
+
+                return data;
+            } catch (err) {
+                console.error(`[Action: ${actName}] Err:`, err);
+                showActionToast('❌', `HIBA A PARANCSNÁL: ${actName}`, `Hálózati vagy feldolgozási hiba: ${err.message}`, 'HIBA', false);
+                updateLiveReactionBox(`HIBA: ${actName}`, err.message, false);
+            }
+        }
+
+        async function sendActionBtn(btnEl, actName, params = {}) {
+            return await sendAction(actName, params, btnEl);
+        }
+
+        async function submitCaretakerSpeech(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInputBox');
+            const val = input.value.trim();
+            if (!val) return;
+            input.value = '';
+            await sendAction('speak', { text: val, valence: 0.4 });
+        }
+
+        async function submitYouTubeUrl() {
+            const input = document.getElementById('ytUrlInput');
+            const url = (input.value || '').trim();
+            if (!url) {
+                alert("Kérlek illessz be egy érvényes YouTube videó linket!");
+                return;
+            }
+            await sendAction('youtube_ingest', { url: url });
+        }
+
+        async function stepYouTubeSlice(direction) {
+            await sendAction('youtube_step', { direction: direction });
+        }
+
+        async function jumpYtTime() {
+            const input = document.getElementById('ytJumpSec');
+            const sec = parseFloat(input ? input.value : 0);
+            if (isNaN(sec) || sec < 0) {
+                alert("Kérlek adj meg egy érvényes másodperc értéket (pl. 30 vagy 120)!");
+                return;
+            }
+            await sendAction('youtube_jump_time', { seconds: sec });
+        }
+
+        let teacherIsPaused = false;
+        async function toggleTeacher() {
+            if (teacherIsPaused) {
+                await sendAction('resume_teacher');
+            } else {
+                await sendAction('pause_teacher');
+            }
+        }
+
+        function drawYtWaveform(points) {
+            const canvas = document.getElementById('ytWaveformCanvas');
+            if (!canvas || !points || points.length === 0) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            
+            ctx.strokeStyle = 'rgba(0, 255, 157, 0.9)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            const mid = h / 2;
+            const step = w / points.length;
+            for (let i = 0; i < points.length; i++) {
+                const amp = Math.max(1, points[i] * (mid - 2));
+                const x = i * step;
+                ctx.moveTo(x, mid - amp);
+                ctx.lineTo(x, mid + amp);
+            }
+            ctx.stroke();
+        }
+
+        async function selectLabPuzzle(pId) {
+            await sendAction('labyrinth_select', { puzzle_id: pId });
+        }
+
+        async function askLabyrinth() {
+            const pSel = document.getElementById('labPuzzleSelect');
+            const pId = pSel ? pSel.value : '';
+            let defaultPrompt = "Miért melegedett túl a motor?";
+            let titlePrompt = "Milyen kérdést teszel fel a rejtett okokról a zsilip feloldásához?";
+            if (pId === 'puzzle_einstein') {
+                titlePrompt = "Milyen tézist / hipotézist állítasz fel a falszifikációhoz? (pl. 'A svédé a hal' vagy 'A németé a hal')";
+                defaultPrompt = "A svédé a hal";
+            } else if (pId === 'puzzle_polya') {
+                titlePrompt = "Hogyan bontod le a problémát egyszerűbb részfeladatokra?";
+                defaultPrompt = "Hogyan készítesz tervet?";
+            }
+            const inq = prompt(titlePrompt, defaultPrompt);
+            if (inq && inq.trim()) {
+                await sendAction('labyrinth_ask', { inquiry: inq.trim() });
+            }
+        }
+
+        async function startGymChallenge() {
+            const selectEl = document.getElementById('gymChallengeSelect');
+            const cId = selectEl ? selectEl.value : 'kresz_exception';
+            showActionToast('🥊', 'EDZŐTEREM INDÍTÁSA', `Kihívás: ${cId} — Hipotézis és élő webes kutatás aktív...`, 'INDÍTVA');
+            await sendAction('gymnasium_start', { challenge_id: cId });
+        }
+
+        // =====================================================================
+        // 3D ISOMETRIC VIRTUAL CLASSROOM RENDER ENGINE
+        // =====================================================================
+        const classCanvas = document.getElementById('classroomCanvas');
+        const cCtx = classCanvas.getContext('2d');
+
+        function resizeClassroom() {
+            classCanvas.width = classCanvas.clientWidth * window.devicePixelRatio;
+            classCanvas.height = classCanvas.clientHeight * window.devicePixelRatio;
+            cCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        window.addEventListener('resize', resizeClassroom);
+
+        // Isometric projection helper: maps 3D [x, y, z] in meters to Canvas [px, py]
+        function projectIso(x, y, z, originX, originY, scale = 220) {
+            // Isometric rotation: 30 deg
+            const isoX = originX + (x - y) * Math.cos(Math.PI / 6) * scale;
+            const isoY = originY + (x + y) * Math.sin(Math.PI / 6) * scale * 0.75 - (z * scale);
+            return [isoX, isoY];
+        }
+
+        function draw3DClassroom() {
+            const w = classCanvas.clientWidth;
+            const h = classCanvas.clientHeight;
+            cCtx.clearRect(0, 0, w, h);
+
+            const originX = w * 0.50;
+            const originY = h * 0.62;
+
+            // 1. Draw Isometric Cyber Table Floor Grid
+            cCtx.strokeStyle = 'rgba(0, 240, 255, 0.12)';
+            cCtx.lineWidth = 1;
+            const gridSize = 0.5;
+            const step = 0.1;
+
+            for (let x = -gridSize; x <= gridSize; x += step) {
+                const [p1x, p1y] = projectIso(x, -gridSize, 0, originX, originY);
+                const [p2x, p2y] = projectIso(x, gridSize, 0, originX, originY);
+                cCtx.beginPath(); cCtx.moveTo(p1x, p1y); cCtx.lineTo(p2x, p2y); cCtx.stroke();
+            }
+            for (let y = -gridSize; y <= gridSize; y += step) {
+                const [p1x, p1y] = projectIso(-gridSize, y, 0, originX, originY);
+                const [p2x, p2y] = projectIso(gridSize, y, 0, originX, originY);
+                cCtx.beginPath(); cCtx.moveTo(p1x, p1y); cCtx.lineTo(p2x, p2y); cCtx.stroke();
+            }
+
+            // Table Border Outline
+            cCtx.strokeStyle = 'rgba(0, 240, 255, 0.4)';
+            cCtx.lineWidth = 1.5;
+            const [c1x, c1y] = projectIso(-gridSize, -gridSize, 0, originX, originY);
+            const [c2x, c2y] = projectIso(gridSize, -gridSize, 0, originX, originY);
+            const [c3x, c3y] = projectIso(gridSize, gridSize, 0, originX, originY);
+            const [c4x, c4y] = projectIso(-gridSize, gridSize, 0, originX, originY);
+            cCtx.beginPath();
+            cCtx.moveTo(c1x, c1y); cCtx.lineTo(c2x, c2y); cCtx.lineTo(c3x, c3y); cCtx.lineTo(c4x, c4y); cCtx.closePath();
+            cCtx.stroke();
+
+            // 2. Draw 3D Physical Objects
+            if (classroomState && classroomState.objects) {
+                for (const [objId, obj] of Object.entries(classroomState.objects)) {
+                    const [px, py] = projectIso(obj.x, obj.y, obj.z, originX, originY);
+                    const [shadowX, shadowY] = projectIso(obj.x, obj.y, 0, originX, originY);
+
+                    // Drop shadow
+                    cCtx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+                    cCtx.beginPath();
+                    cCtx.ellipse(shadowX, shadowY, obj.radius * 240, obj.radius * 130, 0, 0, Math.PI * 2);
+                    cCtx.fill();
+
+                    // Object body
+                    cCtx.fillStyle = obj.color;
+                    cCtx.strokeStyle = '#ffffff';
+                    cCtx.lineWidth = 1;
+
+                    if (obj.shape === 'sphere') {
+                        // Red Ball
+                        cCtx.beginPath();
+                        cCtx.arc(px, py, obj.radius * 230, 0, Math.PI * 2);
+                        cCtx.fill();
+                        cCtx.stroke();
+                        // 3D Highlight
+                        cCtx.fillStyle = 'rgba(255,255,255,0.4)';
+                        cCtx.beginPath();
+                        cCtx.arc(px - 4, py - 4, obj.radius * 80, 0, Math.PI * 2);
+                        cCtx.fill();
+                    } else if (obj.shape === 'cube') {
+                        // Blue Cube
+                        const s = obj.radius * 200;
+                        cCtx.fillRect(px - s*0.5, py - s*0.5, s, s);
+                        cCtx.strokeRect(px - s*0.5, py - s*0.5, s, s);
+                    } else if (obj.shape === 'cylinder') {
+                        // Glass
+                        const wG = obj.radius * 200;
+                        const hG = 30;
+                        cCtx.fillStyle = 'rgba(0, 240, 255, 0.35)';
+                        cCtx.fillRect(px - wG*0.5, py - hG, wG, hG);
+                        cCtx.strokeRect(px - wG*0.5, py - hG, wG, hG);
+                    } else if (obj.shape === 'hot_mug') {
+                        // Hot Mug
+                        const wM = obj.radius * 200;
+                        const hM = 28;
+                        cCtx.fillStyle = '#ffaa00';
+                        cCtx.fillRect(px - wM*0.5, py - hM, wM, hM);
+                        cCtx.strokeRect(px - wM*0.5, py - hM, wM, hM);
+                        // Steam particles
+                        cCtx.strokeStyle = 'rgba(255, 170, 0, 0.6)';
+                        cCtx.beginPath();
+                        cCtx.moveTo(px, py - hM);
+                        cCtx.quadraticCurveTo(px + 6, py - hM - 12, px, py - hM - 20);
+                        cCtx.stroke();
+                    } else {
+                        // Bin
+                        const wB = obj.radius * 160;
+                        cCtx.fillStyle = '#a855f7';
+                        cCtx.fillRect(px - wB*0.5, py - 35, wB, 35);
+                        cCtx.strokeRect(px - wB*0.5, py - 35, wB, 35);
+                    }
+
+                    // Object label
+                    cCtx.fillStyle = 'var(--text-main)';
+                    cCtx.font = '9px monospace';
+                    cCtx.textAlign = 'center';
+                    cCtx.fillText(obj.name, px, py + 14);
+                }
+            }
+
+            // 3. Draw Manipulator Arm & Hand
+            if (classroomState && classroomState.hand) {
+                const hand = classroomState.hand;
+                const [hx, hy] = projectIso(hand.x, hand.y, hand.z, originX, originY);
+                const [bx, by] = projectIso(0, -0.4, 0.45, originX, originY); // Arm Base
+                const [elbowX, elbowY] = projectIso(hand.x * 0.5, hand.y * 0.5 - 0.2, 0.40, originX, originY); // Elbow
+
+                // Shadow under hand
+                const [hShadowX, hShadowY] = projectIso(hand.x, hand.y, 0, originX, originY);
+                cCtx.fillStyle = 'rgba(0, 240, 255, 0.25)';
+                cCtx.beginPath();
+                cCtx.arc(hShadowX, hShadowY, 10, 0, Math.PI * 2);
+                cCtx.fill();
+
+                // Dotted projection line from hand to table floor
+                cCtx.strokeStyle = 'rgba(0, 240, 255, 0.4)';
+                cCtx.setLineDash([3, 3]);
+                cCtx.beginPath(); cCtx.moveTo(hx, hy); cCtx.lineTo(hShadowX, hShadowY); cCtx.stroke();
+                cCtx.setLineDash([]);
+
+                // Articulated Robot Arm Segments
+                cCtx.strokeStyle = '#00f0ff';
+                cCtx.lineWidth = 4;
+                cCtx.shadowColor = '#00f0ff';
+                cCtx.shadowBlur = 8;
+                cCtx.beginPath();
+                cCtx.moveTo(bx, by);
+                cCtx.lineTo(elbowX, elbowY);
+                cCtx.lineTo(hx, hy);
+                cCtx.stroke();
+                cCtx.shadowBlur = 0;
+
+                // Elbow & Wrist Joints
+                cCtx.fillStyle = '#ffffff';
+                cCtx.beginPath(); cCtx.arc(elbowX, elbowY, 5, 0, Math.PI * 2); cCtx.fill();
+                cCtx.beginPath(); cCtx.arc(hx, hy, 6, 0, Math.PI * 2); cCtx.fill();
+
+                // 5-Finger Gripper
+                const gripGap = 12 * (1.0 - (hand.fingers_closure || 0.0)) + 3;
+                cCtx.strokeStyle = '#00ff9d';
+                cCtx.lineWidth = 2.5;
+                // Left finger claw
+                cCtx.beginPath(); cCtx.moveTo(hx - gripGap, hy - 4); cCtx.lineTo(hx - gripGap*0.5, hy + 8); cCtx.stroke();
+                // Right finger claw
+                cCtx.beginPath(); cCtx.moveTo(hx + gripGap, hy - 4); cCtx.lineTo(hx + gripGap*0.5, hy + 8); cCtx.stroke();
+            }
+
+            requestAnimationFrame(draw3DClassroom);
+        }
+
+        // =====================================================================
+        // OSCILLOSCOPE CANVAS ENGINE
+        // =====================================================================
+        const canvas = document.getElementById('oscilloscope');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = canvas.clientWidth * window.devicePixelRatio;
+            canvas.height = canvas.clientHeight * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function drawScope() {
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            ctx.clearRect(0, 0, w, h);
+
+            // Grid
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.08)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 20) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+            }
+            for (let y = 0; y < h; y += 20) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+            }
+
+            // Baseline 15 deg
+            const centerY = h * 0.55;
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(w, centerY); ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Waveform
+            if (thetaBuffer.length > 1) {
+                ctx.beginPath();
+                const step = w / (maxBufferSize - 1);
+                for (let i = 0; i < thetaBuffer.length; i++) {
+                    const theta = thetaBuffer[i];
+                    const norm = (theta - 12.0) / 12.0;
+                    const y = h - (norm * h);
+                    const x = i * step;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.strokeStyle = '#00ff9d';
+                ctx.lineWidth = 2;
+                ctx.shadowColor = '#00ff9d';
+                ctx.shadowBlur = 8;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            requestAnimationFrame(drawScope);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            resizeCanvas();
+            resizeClassroom();
+            initWS();
+            requestAnimationFrame(drawScope);
+            requestAnimationFrame(draw3DClassroom);
+        });
+    </script>
+</body>
+</html>
