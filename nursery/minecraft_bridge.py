@@ -204,6 +204,20 @@ class DeltaP42MinecraftOrganism:
         self._last_tactile_fingers = [0.0, 0.0, 0.0, 0.0, 0.0]
         self._last_slip_velocity = 0.0
 
+        # 6. Recurrent Cognitive Stimulus Queue & Non-Equilibrium Latency Engine
+        self._stimulus_queue: List[Dict[str, Any]] = [
+            {
+                "t_in": time.perf_counter() - 0.020,
+                "intensity": 0.25,
+                "source": "bootstrap_initial_drive",
+                "text": "Kezdeti kognitív állapot felépítése",
+            }
+        ]
+        self._last_cognitive_latency_ms: float = 20.0
+        self._last_delta_p_tension: float = 0.25
+        self._last_control_rod_agc: float = 1.0
+        self._last_recurrent_cloud_depth: int = 1
+
         # Mineflayer Bot Instance
         self.bot: Any = None
         self.mc_connected = False
@@ -212,6 +226,18 @@ class DeltaP42MinecraftOrganism:
         self._current_goal = "Környezet feltérképezése"
         self._sleep_cycle_in_progress = False
         self._slept_this_night = False
+
+    def _push_stimulus(self, source: str, intensity: float, text: str = "") -> None:
+        """Pushes an external or internal stimulus into the recurrent cognitive queue."""
+        with self._state_lock:
+            self._stimulus_queue.append({
+                "t_in": time.perf_counter(),
+                "intensity": float(intensity),
+                "source": source,
+                "text": text,
+            })
+            if len(self._stimulus_queue) > 64:
+                self._stimulus_queue.pop(0)
 
     # --------------------------------------------------------------------------
     # Bot Connection & Event Wiring
@@ -250,6 +276,7 @@ class DeltaP42MinecraftOrganism:
             health_drop = self._last_health - health
             if health_drop > 0.5:
                 logger.warning(f"🚨 SEBZŐDÉS ÉRZÉKELVE! Életerő csökkenés: -{health_drop:.1f} (HP: {health:.1f}/20)")
+                self._push_stimulus(source="nociceptive_pain", intensity=min(1.0, health_drop / 4.0), text=f"Sebződés -{health_drop:.1f} HP")
                 self._trigger_amygdala_pain_reflex(health_drop)
 
             self._last_health = health
@@ -281,6 +308,7 @@ class DeltaP42MinecraftOrganism:
             if is_night and not self._slept_this_night and not self._is_sleeping and not self._sleep_cycle_in_progress:
                 self._slept_this_night = True
                 logger.info(f"🌙 ALKONYAT / ÉJSZAKA ÉRZÉKELVE (timeOfDay={time_of_day}). Cirkadián alváskésztetés indul...")
+                self._push_stimulus(source="circadian_night", intensity=0.6, text="Éjszakai menedékkeresési szükséglet")
                 threading.Thread(target=self._execute_night_sleep_sequence, name="ΔP42-NightSleep", daemon=True).start()
 
         @On(self.bot, "chat")
@@ -288,6 +316,7 @@ class DeltaP42MinecraftOrganism:
             if sender == self.username:
                 return
             logger.info(f"Játékos üzenet [{sender}]: {message}")
+            self._push_stimulus(source="player_speech", intensity=0.75, text=f"{sender}: {message}")
             self._handle_player_speech(sender, message)
 
         @On(self.bot, "wake")
@@ -547,7 +576,7 @@ class DeltaP42MinecraftOrganism:
         logger.info("ΔP-42 leállás kész.")
 
     def _run_living_loop(self) -> None:
-        """50 Hz Subcortical Loop (dt = 20 ms)."""
+        """50 Hz Subcortical Loop (dt = 20 ms) driven by latency > 0 and recurrent feedback."""
         dt_target = 0.020
         next_tick = time.perf_counter()
         current_motor = 0.0
@@ -556,7 +585,35 @@ class DeltaP42MinecraftOrganism:
             t_now = time.perf_counter()
             elapsed_s = t_now - self._start_perf
 
-            # 1. Step Maslow need dynamics (every 5 ticks = 10 Hz)
+            # 1. Recurrent Ingestion & Cognitive Latency Tracking (tau > 0)
+            with self._state_lock:
+                if not self._stimulus_queue:
+                    # Self-excitation: recurrent thought cloud cannot collapse to zero
+                    self._stimulus_queue.append({
+                        "t_in": t_now - 0.018,
+                        "intensity": 0.20,
+                        "source": "recurrent_inner_speech",
+                        "text": self._last_inner_speech or "Rekurrens szófelhő fenntartása",
+                    })
+
+                oldest_stim = self._stimulus_queue[0]
+                tau_ms = max(1.5, (t_now - oldest_stim["t_in"]) * 1000.0)
+                queue_depth = len(self._stimulus_queue)
+                v_l1 = float(np.sum(self._last_maslow_v))
+                emergency = self._emergency_active
+                is_sleep = self._is_sleeping
+
+            # Non-equilibrium tension gradient: Delta P > 0
+            # Driven by internal latency (tau_ms > 0) + Maslow deficiency + stimulus queue depth
+            delta_p = min(0.98, (tau_ms / 150.0) * 0.35 + 0.25 * v_l1 + 0.08 * min(5, queue_depth))
+
+            # Nuclear Reactor Control Rod (AGC & Basal Ganglia Moderation):
+            # Moderates excessive excitation to prevent supercritical runaway, keeping k_eff ~ 1.0
+            rod_moderation = 1.0 / (1.0 + 0.9 * max(0.0, delta_p - 0.35))
+            thalamus_base = (0.22 + 0.16 * math.sin(elapsed_s * 2.0 * math.pi * 0.35)) * rod_moderation
+            thalamic_delta = min(0.98, max(0.12, (thalamus_base + 0.22 * delta_p) if not emergency else 0.95))
+
+            # 2. Step Maslow need dynamics (every 5 ticks = 10 Hz)
             if self._tick_counter % 5 == 0:
                 with self._state_lock:
                     snap_v = self.maslow_integrator.step(
@@ -576,20 +633,14 @@ class DeltaP42MinecraftOrganism:
                     self.theta_engine.latch_maslow(merged_snap)
                     self._last_maslow_v = snap_vec
 
-            # 2. Step Theta Pacemaker (50 Hz with biological theta rhythm wave)
-            with self._state_lock:
-                v_l1 = float(np.sum(self._last_maslow_v))
-                emergency = self._emergency_active
-                is_sleep = self._is_sleeping
-
-            thalamus_wave = 0.22 + 0.16 * math.sin(elapsed_s * 2.0 * math.pi * 0.35)
+            # 3. Step Theta Pacemaker with moderated non-equilibrium drive
             theta_rad, theta_deg, dot_theta = self.theta_engine.step(
                 V_l1=v_l1,
-                delta=thalamus_wave if not emergency else 0.95,
+                delta=thalamic_delta,
                 a_motor=current_motor if not emergency else 1.0,
             )
 
-            # 3. Basal Ganglia Motor Gate & Relaxation Oscillator Discharge
+            # 4. Basal Ganglia Motor Gate & Relaxation Oscillator Discharge
             decision = self.basal_ganglia.evaluate(
                 theta_rad=theta_rad,
                 delta_etiquette_deg=self.caretaker_console.etiquette_shift_deg if not emergency else 0.0,
@@ -598,7 +649,6 @@ class DeltaP42MinecraftOrganism:
 
             # Canonical Relaxation Discharge: When theta crosses 18.0 deg, motor action fires and discharges tension!
             if theta_deg >= 18.0 and not is_sleep:
-                # Motor action burst (Action Potential)
                 current_motor = 0.90
                 # Dispatch autonomous action in Minecraft
                 if self.bot is not None:
@@ -607,7 +657,18 @@ class DeltaP42MinecraftOrganism:
                         self._consume_food_inventory()
                     else:
                         self._wander_and_explore()
-                # Dissipate tension back to baseline attractor (15.0 deg) - Delta P never zero!
+
+                # Dissipate tension back to baseline attractor (15.0 deg) - discharge stimulus
+                with self._state_lock:
+                    if self._stimulus_queue:
+                        discharged = self._stimulus_queue.pop(0)
+                    # Re-inject recurrent reflection into stimulus queue
+                    self._stimulus_queue.append({
+                        "t_in": time.perf_counter(),
+                        "intensity": 0.28,
+                        "source": "action_reflection",
+                        "text": f"Akció kisülés: {self._current_goal}",
+                    })
                 self.theta_engine.reset(theta_deg=15.0)
             elif is_sleep:
                 current_motor = 0.0  # Motor Atonia locked
@@ -618,7 +679,7 @@ class DeltaP42MinecraftOrganism:
             else:
                 current_motor = 0.0
 
-            # 4. Step Dynamic Neural Core (CUDA Living Synapses)
+            # 5. Step Dynamic Neural Core (CUDA Living Synapses)
             with self._state_lock:
                 m_v_snap = self._last_maslow_v.copy()
 
@@ -637,6 +698,10 @@ class DeltaP42MinecraftOrganism:
                 self._last_theta_deg = theta_deg
                 self._last_dot_theta = dot_theta
                 self._last_motor_action = current_motor
+                self._last_cognitive_latency_ms = tau_ms
+                self._last_delta_p_tension = delta_p
+                self._last_control_rod_agc = rod_moderation
+                self._last_recurrent_cloud_depth = len(self._stimulus_queue)
 
             # Advance tick
             self._tick_counter += 1
@@ -735,6 +800,10 @@ class DeltaP42MinecraftOrganism:
             "last_dream_verdict": self._last_dream_verdict,
             "last_dream_delta_ratio": self._last_dream_delta_ratio,
             "last_dream_content": self._last_dream_content,
+            "cognitive_latency_ms": round(self._last_cognitive_latency_ms, 2),
+            "delta_p_tension": round(self._last_delta_p_tension, 4),
+            "control_rod_agc": round(self._last_control_rod_agc, 3),
+            "recurrent_cloud_depth": self._last_recurrent_cloud_depth,
             "minecraft": mc_data,
         }
 

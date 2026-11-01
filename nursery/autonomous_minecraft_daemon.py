@@ -296,6 +296,10 @@ class AutonomousMinecraftDaemon:
                     "dream_verdict": snap.get("last_dream_verdict", "—"),
                     "dream_delta_ratio": snap.get("last_dream_delta_ratio", 0.0),
                     "synaptic_variance_reduction_pct": snap.get("last_rem_variance_reduction", 0.0),
+                    "cognitive_latency_ms": snap.get("cognitive_latency_ms", 0.0),
+                    "delta_p_tension": snap.get("delta_p_tension", 0.0),
+                    "control_rod_agc": snap.get("control_rod_agc", 1.0),
+                    "recurrent_cloud_depth": snap.get("recurrent_cloud_depth", 0),
                     "total_cycles_completed": self._sleep_cycles_total,
                 }
                 with open(METRICS_FILE, "a", encoding="utf-8") as f:

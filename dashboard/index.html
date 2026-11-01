@@ -1117,6 +1117,11 @@
                             <div>θ: <b id="scopeTheta" style="color:var(--green); font-size:12px;">15.00°</b></div>
                             <div>dθ/dt: <span id="scopeDotTheta">+0.00 rad/s</span></div>
                             <div>Kuramoto r: <span id="scopeKuramoto" style="color:var(--amber);">0.850</span></div>
+                            <div style="border-top: 1px solid rgba(255,255,255,0.15); margin-top:3px; padding-top:3px; display:flex; flex-direction:column; gap:2px;">
+                                <div>τ Latencia: <b id="scopeLatency" style="color:var(--cyan); font-size:11px;">18.2 ms</b></div>
+                                <div>ΔP Feszültség: <b id="scopeDeltaP" style="color:#f43f5e; font-size:11px;">+0.284</b></div>
+                                <div>Szénrúd (AGC): <b id="scopeRod" style="color:#a7f3d0; font-size:11px;">0.95x</b></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1713,14 +1718,24 @@
             if (varEl) varEl.innerText = `${(dyn.variance_reduction_pct || 0).toFixed(1)}%`;
             if (amEl) amEl.innerText = (dyn.a_motor_core || 0).toFixed(2);
 
-            // Center Column: Pacemaker
+            // Center Column: Pacemaker & Latency Metrics
             const theta = snap.theta_deg || 15.0;
             const dotTheta = snap.dot_theta || 0.0;
+            const tauMs = snap.cognitive_latency_ms || 18.0;
+            const deltaP = snap.delta_p_tension || 0.25;
+            const rodAgc = snap.control_rod_agc || 1.0;
+
             document.getElementById('scopeTheta').innerText = `${theta.toFixed(2)}°`;
             document.getElementById('scopeDotTheta').innerText = `${dotTheta >= 0 ? '+' : ''}${dotTheta.toFixed(2)} rad/s`;
             document.getElementById('scopeKuramoto').innerText = (snap.kuramoto_r || 0.85).toFixed(3);
+            const latEl = document.getElementById('scopeLatency');
+            if (latEl) latEl.innerText = `${tauMs.toFixed(1)} ms`;
+            const dpEl = document.getElementById('scopeDeltaP');
+            if (dpEl) dpEl.innerText = `${deltaP >= 0 ? '+' : ''}${deltaP.toFixed(3)}`;
+            const rodEl = document.getElementById('scopeRod');
+            if (rodEl) rodEl.innerText = `${rodAgc.toFixed(2)}x`;
 
-            thetaBuffer.push(theta);
+            thetaBuffer.push({ theta: theta, deltaP: deltaP });
             if (thetaBuffer.length > maxBufferSize) thetaBuffer.shift();
 
             // Dream Theater Visor
@@ -2401,20 +2416,38 @@
             ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(w, centerY); ctx.stroke();
             ctx.setLineDash([]);
 
-            // Waveform
+            // Waveforms: Theta Phase Limit Cycle & Delta P Tension Envelope
             if (thetaBuffer.length > 1) {
-                ctx.beginPath();
                 const step = w / (maxBufferSize - 1);
+
+                // 1. Delta P Tension Envelope (glowing pink/amber)
+                ctx.beginPath();
                 for (let i = 0; i < thetaBuffer.length; i++) {
-                    const theta = thetaBuffer[i];
-                    const norm = (theta - 12.0) / 12.0;
-                    const y = h - (norm * h);
+                    const item = thetaBuffer[i];
+                    const dp = (typeof item === 'object' && item !== null) ? item.deltaP : 0.25;
+                    const y = h - (dp * h * 0.70) - (h * 0.15);
+                    const x = i * step;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.strokeStyle = 'rgba(244, 63, 94, 0.45)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // 2. Theta Pacemaker Phase Waveform (neon green pulse)
+                ctx.beginPath();
+                for (let i = 0; i < thetaBuffer.length; i++) {
+                    const item = thetaBuffer[i];
+                    const theta = (typeof item === 'object' && item !== null) ? item.theta : item;
+                    const norm = (theta - 14.5) / 4.0;
+                    const clampedNorm = Math.max(0.05, Math.min(0.95, norm));
+                    const y = h - (clampedNorm * h);
                     const x = i * step;
                     if (i === 0) ctx.moveTo(x, y);
                     else ctx.lineTo(x, y);
                 }
                 ctx.strokeStyle = '#00ff9d';
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 2.2;
                 ctx.shadowColor = '#00ff9d';
                 ctx.shadowBlur = 8;
                 ctx.stroke();
