@@ -436,7 +436,25 @@ class DeltaP42MinecraftOrganism:
         elif any(w in lower_txt for w in ["egyél", "étel", "éhes", "eat"]):
             self._consume_food_inventory()
 
-    def _consume_food_inventory(self) -> bool:
+    def _wander_and_explore(self) -> None:
+        """Autonomously explores nearby terrain during daytime."""
+        if not self.bot or not hasattr(self.bot, "entity") or not self.bot.entity:
+            return
+        try:
+            pos = self.bot.entity.position
+            # Wander 6-12 blocks away in a random direction
+            angle = float(np.random.uniform(0, 2 * math.pi))
+            dist = float(np.random.uniform(6.0, 12.0))
+            target_x = float(pos.x + math.cos(angle) * dist)
+            target_z = float(pos.z + math.sin(angle) * dist)
+            target_y = float(pos.y)
+
+            if hasattr(self.bot, "pathfinder") and self.bot.pathfinder:
+                self._current_goal = f"Autonóm felderítés ({target_x:.0f}, {target_z:.0f})"
+                self.bot.pathfinder.setGoal(Goals.GoalNear(target_x, target_y, target_z, 2))
+                logger.info(f"🧭 Nappali felderítő mozgás: ({target_x:.1f}, {target_z:.1f})")
+        except Exception as e:
+            logger.debug(f"Felderítési kivétel: {e}")
         """Searches inventory for food items and consumes them."""
         try:
             food_names = ["bread", "apple", "cooked_beef", "cooked_porkchop", "cooked_mutton", "baked_potato", "carrot"]
@@ -530,26 +548,49 @@ class DeltaP42MinecraftOrganism:
                     self.theta_engine.latch_maslow(merged_snap)
                     self._last_maslow_v = snap_vec
 
-            # 2. Step Theta Pacemaker (50 Hz)
+            # 2. Step Theta Pacemaker (50 Hz with biological theta rhythm wave)
             with self._state_lock:
                 v_l1 = float(np.sum(self._last_maslow_v))
                 emergency = self._emergency_active
                 is_sleep = self._is_sleeping
 
+            thalamus_wave = 0.22 + 0.16 * math.sin(elapsed_s * 2.0 * math.pi * 0.35)
             theta_rad, theta_deg, dot_theta = self.theta_engine.step(
                 V_l1=v_l1,
-                delta=0.15 if not emergency else 0.95,
+                delta=thalamus_wave if not emergency else 0.95,
                 a_motor=current_motor if not emergency else 1.0,
             )
 
-            # 3. Basal Ganglia Motor Gate
+            # 3. Basal Ganglia Motor Gate & Relaxation Oscillator Discharge
             decision = self.basal_ganglia.evaluate(
                 theta_rad=theta_rad,
                 delta_etiquette_deg=self.caretaker_console.etiquette_shift_deg if not emergency else 0.0,
             )
             bg_motor = decision.a_motor
 
-            # 4. PyTorch CUDA Dynamic Neural Core (living synapses step)
+            # Canonical Relaxation Discharge: When theta crosses 18.0 deg, motor action fires and discharges tension!
+            if theta_deg >= 18.0 and not is_sleep:
+                # Motor action burst (Action Potential)
+                current_motor = 0.90
+                # Dispatch autonomous action in Minecraft
+                if self.bot is not None:
+                    if self._last_maslow_v[0] > 0.35:
+                        self._current_goal = "Éhség csökkentése (táplálkozás)"
+                        self._consume_food_inventory()
+                    else:
+                        self._wander_and_explore()
+                # Dissipate tension back to baseline attractor (15.0 deg) - Delta P never zero!
+                self.theta_engine.reset(theta_deg=15.0)
+            elif is_sleep:
+                current_motor = 0.0  # Motor Atonia locked
+            elif emergency:
+                current_motor = 1.0  # Amygdala maximum motor surge
+            elif bg_motor > 0.05:
+                current_motor = float(max(0.0, min(1.0, bg_motor)))
+            else:
+                current_motor = 0.0
+
+            # 4. Step Dynamic Neural Core (CUDA Living Synapses)
             with self._state_lock:
                 m_v_snap = self._last_maslow_v.copy()
 
@@ -562,22 +603,6 @@ class DeltaP42MinecraftOrganism:
                 audio_rms=10.0 if not self._last_vad_active else 500.0,
                 reward_valence=0.1 if not emergency else -0.9,
             )
-
-            if is_sleep:
-                current_motor = 0.0  # Motor Atonia locked
-            elif emergency:
-                current_motor = 1.0  # Amygdala maximum motor surge
-            elif bg_motor > 0.05:
-                current_motor = float(max(0.0, min(1.0, bg_motor * 0.70 + core_step["a_motor"] * 0.30)))
-            else:
-                current_motor = 0.0
-
-            # 5. Autonomous Action Dispatcher in Minecraft
-            if not is_sleep and not emergency and self.mc_connected and self.bot is not None:
-                # If hunger is high (V0 > 0.4), prioritize eating
-                if self._last_maslow_v[0] > 0.40 and self._tick_counter % 100 == 0:
-                    self._current_goal = "Éhség csökkentése (élelemkeresés)"
-                    self._consume_food_inventory()
 
             with self._state_lock:
                 self._last_dynamic_core_out = core_step
@@ -622,10 +647,14 @@ class DeltaP42MinecraftOrganism:
             "current_goal": self._current_goal,
         }
 
-        if self.mc_connected and self.bot is not None:
+        is_conn = False
+        if self.bot is not None:
             try:
-                if hasattr(self.bot, "entity") and hasattr(self.bot.entity, "position"):
+                if hasattr(self.bot, "entity") and self.bot.entity and hasattr(self.bot.entity, "position"):
+                    is_conn = True
+                    self.mc_connected = True
                     pos = self.bot.entity.position
+                    mc_data["connected"] = True
                     mc_data["x"] = round(float(pos.x), 2)
                     mc_data["y"] = round(float(pos.y), 2)
                     mc_data["z"] = round(float(pos.z), 2)
@@ -635,8 +664,13 @@ class DeltaP42MinecraftOrganism:
                     tod = int(self.bot.time.timeOfDay)
                     mc_data["time_of_day"] = tod
                     mc_data["is_day"] = tod < 12500 or tod > 23000
+                if hasattr(self.bot, "health"):
+                    mc_data["health"] = float(self.bot.health)
+                if hasattr(self.bot, "food"):
+                    mc_data["food"] = float(self.bot.food)
             except Exception:
                 pass
+        mc_data["connected"] = is_conn or self.mc_connected
 
         return {
             "ticks": self._tick_counter,

@@ -273,8 +273,11 @@ class ThetaEngine:
         # 4. Motor action quenching negative feedback braking
         damping_motor = -self._gamma * float(a_motor)
 
-        # Net phase velocity ODE
+        # Net phase velocity ODE with Non-Equilibrium Invariant (Delta P > 0)
         dot_theta = drive_maslow + restoring_torque + drive_thalamus + damping_motor
+        if dot_theta < 0.05 and resolved_l1 > 0.10:
+            # Thermodynamic Non-Equilibrium Invariant: biological pacemaker never reaches thermal death
+            dot_theta = 0.08 + 0.04 * math.sin(self._time_s * 2.0 * math.pi * 0.5)
 
         # Forward Euler state integration
         self._theta += dot_theta * self._dt

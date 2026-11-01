@@ -1061,33 +1061,44 @@
             <!-- CENTER COLUMN: 3D Virtual Classroom, Waveform, Dream Theater & Cortical Roster -->
             <div class="center-stack">
                 
-                <!-- 3D VIRTUAL CLASSROOM VIEWPORT -->
-                <div class="panel" style="padding:10px;">
-                    <div class="panel-header" style="margin-bottom:6px;">
-                        <span class="panel-title" style="color:var(--cyan);">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                            3D Virtuális Tanterem & Manipulátor Kar (Embodied Sandbox)
+                <!-- MINECRAFT 3D EMBODIED COGNITIVE RADAR & COMPASS HUD -->
+                <div class="panel" style="padding:14px; border-color: rgba(0, 255, 157, 0.5); box-shadow: 0 0 25px rgba(0, 255, 157, 0.15);">
+                    <div class="panel-header" style="margin-bottom:10px;">
+                        <span class="panel-title" style="color:var(--green); font-size:12px; font-weight:800;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                            ΔP-42 Minecraft Embodied Navigációs & Térbeli Radar
                         </span>
-                        <span class="panel-chip" id="taskNameChip" style="color:#ffffff; background:rgba(168,85,247,0.2); border-color:var(--purple);">
-                            1. LECKE: PIROS LABDA
+                        <span class="panel-chip" id="mcCenterStatusChip" style="color:var(--green); background:rgba(0,255,157,0.18); border-color:var(--green); font-weight:700;">
+                            SZERVER: 127.0.0.1:25565 (ÉLŐ)
                         </span>
                     </div>
 
-                    <div class="classroom-container">
-                        <canvas id="classroomCanvas"></canvas>
-                        <div class="classroom-hud">
-                            <div class="teacher-badge" style="display:flex; align-items:center; gap:10px;">
-                                <span style="font-size:12px;">👨‍🏫 Autonóm Nevelő:</span>
-                                <span id="hudTeacherStatus" style="color:#ffffff; font-weight:bold; font-size:12px;">Vezeti a tanórát...</span>
-                                <button id="btnTeacherToggle" class="btn-sci" style="padding:4px 10px; font-size:11px; border-color:var(--amber); color:var(--amber);" onclick="toggleTeacher()">⏸️ Csendesítés (Standby)</button>
-                            </div>
-                            <div class="task-pills">
-                                <button class="btn-task active" onclick="sendActionBtn(this, 'set_task', {task_id: 1})">1. Labda</button>
-                                <button class="btn-task" onclick="sendActionBtn(this, 'set_task', {task_id: 2})">2. Pohár</button>
-                                <button class="btn-task" onclick="sendActionBtn(this, 'set_task', {task_id: 3})">3. Forró Csésze</button>
-                                <button class="btn-task" onclick="sendActionBtn(this, 'set_task', {task_id: 4})">4. Illem</button>
-                            </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-family: var(--font-mono); font-size: 11px; margin-bottom: 12px;">
+                        <div style="background: rgba(0,240,255,0.08); padding: 10px; border-radius: 8px; border: 1px solid rgba(0,240,255,0.3);">
+                            <div style="color: var(--text-dim); font-size: 9px; letter-spacing: 1px;">3D POZÍCIÓ (X, Y, Z)</div>
+                            <div id="mcCenterCoords" style="color: var(--cyan); font-weight: 800; font-size: 15px; margin-top: 4px;">X: 8.5 | Y: 73.0 | Z: 8.5</div>
                         </div>
+                        <div style="background: rgba(0,255,157,0.08); padding: 10px; border-radius: 8px; border: 1px solid rgba(0,255,157,0.3);">
+                            <div style="color: var(--text-dim); font-size: 9px; letter-spacing: 1px;">TEKINTET / IRÁNY</div>
+                            <div id="mcCenterYaw" style="color: var(--green); font-weight: 800; font-size: 15px; margin-top: 4px;">0.0° (ÉSZAK)</div>
+                        </div>
+                        <div style="background: rgba(255,51,102,0.08); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,51,102,0.3);">
+                            <div style="color: var(--text-dim); font-size: 9px; letter-spacing: 1px;">ÉLETERŐ & NOCICEPCIÓ</div>
+                            <div id="mcCenterHp" style="color: var(--red); font-weight: 800; font-size: 15px; margin-top: 4px;">20.0 / 20 HP</div>
+                        </div>
+                        <div style="background: rgba(168,85,247,0.08); padding: 10px; border-radius: 8px; border: 1px solid rgba(168,85,247,0.3);">
+                            <div style="color: var(--text-dim); font-size: 9px; letter-spacing: 1px;">CIRKADIÁN NAPSZAK</div>
+                            <div id="mcCenterTime" style="color: var(--purple); font-weight: 800; font-size: 15px; margin-top: 4px;">☀️ NAPPAL</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(2, 6, 16, 0.88); border: 1px solid rgba(0,255,157,0.3); border-radius: 8px; padding: 12px; font-family: var(--font-mono); font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span class="dot-pulse" style="width:8px; height:8px; background:var(--green); box-shadow:0 0 10px var(--green);"></span>
+                            <span style="color: var(--text-dim);">AKTUÁLIS KOGNITÍV CÉL:</span>
+                            <span id="mcCenterGoal" style="color: #ffffff; font-weight: 800;">Autonóm felderítés és táplálékszerzés</span>
+                        </div>
+                        <span class="panel-chip" style="background: rgba(0,255,157,0.15); color: var(--green); border-color: var(--green);">50 Hz EMBODIED DYNAMICS</span>
                     </div>
                 </div>
 
@@ -1556,6 +1567,18 @@
                         document.getElementById('mcGoalVal').innerText = mc.current_goal || 'Környezet feltérképezése';
                     }
                 }
+
+                // Center Minecraft Radar HUD Update
+                const cCoords = document.getElementById('mcCenterCoords');
+                const cYaw = document.getElementById('mcCenterYaw');
+                const cHp = document.getElementById('mcCenterHp');
+                const cTime = document.getElementById('mcCenterTime');
+                const cGoal = document.getElementById('mcCenterGoal');
+                if (cCoords) cCoords.innerText = `X: ${mc.x || 8.5} | Y: ${mc.y || 73.0} | Z: ${mc.z || 8.5}`;
+                if (cYaw) cYaw.innerText = `${(mc.yaw || 0).toFixed(1)}°`;
+                if (cHp) cHp.innerText = `${(mc.health || 20).toFixed(1)} / 20 HP`;
+                if (cTime) cTime.innerText = mc.is_day ? `☀️ NAPPAL (${mc.time_of_day || 0}t)` : `🌙 ÉJSZAKA (${mc.time_of_day || 0}t)`;
+                if (cGoal) cGoal.innerText = mc.current_goal || 'Autonóm felderítés és túlélés';
             }
 
             const isSleeping = snap.is_sleeping || false;
