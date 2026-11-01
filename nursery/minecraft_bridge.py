@@ -300,8 +300,29 @@ class DeltaP42MinecraftOrganism:
 
         @On(self.bot, "kicked")
         def on_kicked(this, reason, *args):
-            logger.warning(f"Bot lecsatlakozva (kicked): {reason}")
+            logger.warning(f"Bot lecsatlakozva (kicked): {reason}. Automatikus újracsatlakozás 3 mp múlva...")
             self.mc_connected = False
+            def reconnect():
+                time.sleep(3.0)
+                if self._running:
+                    try:
+                        self.connect_minecraft()
+                    except Exception as e:
+                        logger.error(f"Újracsatlakozási hiba: {e}")
+            threading.Thread(target=reconnect, daemon=True, name="ΔP42-Reconnect").start()
+
+        @On(self.bot, "end")
+        def on_end(*args):
+            logger.warning("Bot kapcsolat lezárult (end). Automatikus újracsatlakozás 3 mp múlva...")
+            self.mc_connected = False
+            def reconnect():
+                time.sleep(3.0)
+                if self._running:
+                    try:
+                        self.connect_minecraft()
+                    except Exception as e:
+                        logger.error(f"Újracsatlakozási hiba: {e}")
+            threading.Thread(target=reconnect, daemon=True, name="ΔP42-Reconnect").start()
 
         @On(self.bot, "error")
         def on_error(this, err, *args):
@@ -437,22 +458,29 @@ class DeltaP42MinecraftOrganism:
             self._consume_food_inventory()
 
     def _wander_and_explore(self) -> None:
-        """Autonomously explores nearby terrain during daytime."""
+        """Autonomously explores nearby terrain during daytime, respecting physical movement latency."""
         if not self.bot or not hasattr(self.bot, "entity") or not self.bot.entity:
             return
+        
+        # Physical Task Latency: Do not spam goals while previous walk is in progress
+        now = time.time()
+        if hasattr(self, "_last_wander_time") and (now - self._last_wander_time) < 8.0:
+            return
+        self._last_wander_time = now
+
         try:
             pos = self.bot.entity.position
-            # Wander 6-12 blocks away in a random direction
+            # Pick a target 8-14 blocks away
             angle = float(np.random.uniform(0, 2 * math.pi))
-            dist = float(np.random.uniform(6.0, 12.0))
+            dist = float(np.random.uniform(8.0, 14.0))
             target_x = float(pos.x + math.cos(angle) * dist)
             target_z = float(pos.z + math.sin(angle) * dist)
             target_y = float(pos.y)
 
             if hasattr(self.bot, "pathfinder") and self.bot.pathfinder:
-                self._current_goal = f"Autonóm felderítés ({target_x:.0f}, {target_z:.0f})"
-                self.bot.pathfinder.setGoal(Goals.GoalNear(target_x, target_y, target_z, 2))
-                logger.info(f"🧭 Nappali felderítő mozgás: ({target_x:.1f}, {target_z:.1f})")
+                self._current_goal = f"Felderítő séta ({target_x:.0f}, {target_z:.0f})"
+                self.bot.pathfinder.setGoal(Goals.GoalNear(target_x, target_y, target_z, 1))
+                logger.info(f"🧭 Nappali felderítő mozgás elindítva: cél ({target_x:.1f}, {target_z:.1f})")
         except Exception as e:
             logger.debug(f"Felderítési kivétel: {e}")
         """Searches inventory for food items and consumes them."""
