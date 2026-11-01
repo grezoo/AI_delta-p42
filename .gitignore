@@ -58,3 +58,7 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+
+# Local runtime tools & packages
+tools/
+node_modules/
