@@ -1090,6 +1090,13 @@
                             <div style="color: var(--text-dim); font-size: 9px; letter-spacing: 1px;">CIRKADIÁN NAPSZAK</div>
                             <div id="mcCenterTime" style="color: var(--purple); font-weight: 800; font-size: 15px; margin-top: 4px;">☀️ NAPPAL</div>
                         </div>
+                        <div style="grid-column: span 4; background: rgba(245, 158, 11, 0.08); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.3); display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="color: var(--amber); font-weight: 700;">🤝 MULTI-AGENT KOLÓNIA:</span>
+                                <span id="colonyCompanionStatus" style="color: #ffffff;">DeltaCraftsman (Előkészítve)</span>
+                            </div>
+                            <div style="color: var(--amber); font-weight: 700;" id="colonyDistanceReadout">Társ távolság: -- m</div>
+                        </div>
                     </div>
 
                     <div style="background: rgba(2, 6, 16, 0.88); border: 1px solid rgba(0,255,157,0.3); border-radius: 8px; padding: 12px; font-family: var(--font-mono); font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
@@ -1584,6 +1591,18 @@
                 if (cHp) cHp.innerText = `${(mc.health || 20).toFixed(1)} / 20 HP`;
                 if (cTime) cTime.innerText = mc.is_day ? `☀️ NAPPAL (${mc.time_of_day || 0}t)` : `🌙 ÉJSZAKA (${mc.time_of_day || 0}t)`;
                 if (cGoal) cGoal.innerText = mc.current_goal || 'Autonóm felderítés és túlélés';
+
+                const compEl = document.getElementById('colonyCompanionStatus');
+                const compDistEl = document.getElementById('colonyDistanceReadout');
+                if (compDistEl) {
+                    if (mc.companion_distance !== null && mc.companion_distance !== undefined && mc.companion_distance >= 0) {
+                        compDistEl.innerText = `Társ távolság: ${mc.companion_distance.toFixed(1)} m`;
+                        if (compEl) compEl.innerText = "DeltaCraftsman (Aktív kapcsolat)";
+                    } else {
+                        compDistEl.innerText = "Társ távolság: Látóhatáron kívül";
+                        if (compEl) compEl.innerText = "DeltaCraftsman (Keresés...)";
+                    }
+                }
             }
 
             const isSleeping = snap.is_sleeping || false;

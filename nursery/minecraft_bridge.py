@@ -625,6 +625,30 @@ class DeltaP42MinecraftOrganism:
                     snap_vec = snap_v.vector.copy()
                     snap_vec[0] = self._last_maslow_v[0]  # Hunger from bot.food
                     snap_vec[1] = self._last_maslow_v[1]  # Nociception from bot.health
+
+                    # Companion / Peer Social Coupling (Maslow V2 - Affiliation Dynamics)
+                    if self.bot and hasattr(self.bot, "players"):
+                        peer_nearby = False
+                        try:
+                            for pname, player in dict(self.bot.players).items():
+                                if pname != self.username and hasattr(player, "entity") and player.entity:
+                                    p_pos = player.entity.position
+                                    my_pos = self.bot.entity.position
+                                    dist = math.sqrt(
+                                        (float(p_pos.x) - float(my_pos.x)) ** 2
+                                        + (float(p_pos.y) - float(my_pos.y)) ** 2
+                                        + (float(p_pos.z) - float(my_pos.z)) ** 2
+                                    )
+                                    if dist < 14.0:
+                                        peer_nearby = True
+                                        break
+                            if peer_nearby:
+                                snap_vec[2] = max(0.05, float(self._last_maslow_v[2]) * 0.96)
+                            else:
+                                snap_vec[2] = min(0.85, float(self._last_maslow_v[2]) + 0.003)
+                        except Exception:
+                            pass
+
                     merged_snap = MaslowSnapshot(
                         timestamp_ns=time.time_ns(),
                         vector=snap_vec,
@@ -761,6 +785,22 @@ class DeltaP42MinecraftOrganism:
                     mc_data["health"] = float(self.bot.health)
                 if hasattr(self.bot, "food"):
                     mc_data["food"] = float(self.bot.food)
+
+                # Track nearest companion/peer distance
+                comp_dist = -1.0
+                if hasattr(self.bot, "players"):
+                    for pname, player in dict(self.bot.players).items():
+                        if pname != self.username and hasattr(player, "entity") and player.entity:
+                            p_pos = player.entity.position
+                            pos = self.bot.entity.position
+                            dist = math.sqrt(
+                                (float(p_pos.x) - float(pos.x)) ** 2
+                                + (float(p_pos.y) - float(pos.y)) ** 2
+                                + (float(p_pos.z) - float(pos.z)) ** 2
+                            )
+                            comp_dist = dist
+                            break
+                mc_data["companion_distance"] = round(comp_dist, 2) if comp_dist >= 0 else None
             except Exception:
                 pass
         mc_data["connected"] = is_conn or self.mc_connected
