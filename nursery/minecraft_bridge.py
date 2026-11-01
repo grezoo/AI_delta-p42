@@ -211,6 +211,7 @@ class DeltaP42MinecraftOrganism:
         self._last_food = 20.0
         self._current_goal = "Környezet feltérképezése"
         self._sleep_cycle_in_progress = False
+        self._slept_this_night = False
 
     # --------------------------------------------------------------------------
     # Bot Connection & Event Wiring
@@ -269,7 +270,16 @@ class DeltaP42MinecraftOrganism:
             # Night starts at ~12500 ticks and ends around 23000 ticks
             is_night = 12500 <= time_of_day <= 23000
 
-            if is_night and not self._is_sleeping and not self._sleep_cycle_in_progress:
+            if not is_night:
+                if self._slept_this_night:
+                    self._slept_this_night = False
+                    try:
+                        self.bot.setControlState("sneak", False)
+                    except Exception:
+                        pass
+
+            if is_night and not self._slept_this_night and not self._is_sleeping and not self._sleep_cycle_in_progress:
+                self._slept_this_night = True
                 logger.info(f"🌙 ALKONYAT / ÉJSZAKA ÉRZÉKELVE (timeOfDay={time_of_day}). Cirkadián alváskésztetés indul...")
                 threading.Thread(target=self._execute_night_sleep_sequence, name="ΔP42-NightSleep", daemon=True).start()
 
@@ -360,20 +370,21 @@ class DeltaP42MinecraftOrganism:
         bed_found = False
         try:
             # Search for bed block within 32 blocks
-            bed_block = self.bot.findBlock({
-                "matching": lambda b: "bed" in getattr(b, "name", ""),
-                "maxDistance": 32,
-            })
-            if bed_block is not None:
-                logger.info(f"Ágy megtalálva a pozíción: {bed_block.position}. Odalépés...")
-                self.bot.pathfinder.setGoal(Goals.GoalBlock(bed_block.position.x, bed_block.position.y, bed_block.position.z))
-                time.sleep(2.5)
-                try:
-                    self.bot.sleep(bed_block)
-                    bed_found = True
-                    logger.info("A bot sikeresen lefeküdt az ágyba!")
-                except Exception as sleep_err:
-                    logger.info(f"Ágyba fekvés nem sikerült ({sleep_err}), védett alvási pozíció felvétele.")
+            if hasattr(self.bot, "pathfinder") and self.bot.pathfinder:
+                bed_block = self.bot.findBlock({
+                    "matching": lambda b: "bed" in getattr(b, "name", "").lower(),
+                    "maxDistance": 32,
+                })
+                if bed_block is not None:
+                    logger.info(f"Ágy megtalálva a pozíción: {bed_block.position}. Odalépés...")
+                    self.bot.pathfinder.setGoal(Goals.GoalBlock(bed_block.position.x, bed_block.position.y, bed_block.position.z))
+                    time.sleep(2.5)
+                    try:
+                        self.bot.sleep(bed_block)
+                        bed_found = True
+                        logger.info("A bot sikeresen lefeküdt az ágyba!")
+                    except Exception as sleep_err:
+                        logger.info(f"Ágyba fekvés nem sikerült ({sleep_err}), védett alvási pozíció felvétele.")
         except Exception as e:
             logger.info(f"Ágykeresési kivétel: {e}")
 
@@ -386,13 +397,6 @@ class DeltaP42MinecraftOrganism:
 
         # Trigger full biological sleep consolidation
         self.trigger_sleep_cycle()
-
-        # Remain in atonia / resting until dawn
-        time.sleep(5.0)
-        try:
-            self.bot.setControlState("sneak", False)
-        except Exception:
-            pass
 
         self._sleep_cycle_in_progress = False
 
@@ -515,10 +519,16 @@ class DeltaP42MinecraftOrganism:
                         E_env=1.0 if current_motor > 0 else 0.0,
                     )
                     # Blend with Minecraft real-world physical hunger and health
-                    snap_v.vector[0] = self._last_maslow_v[0]  # Hunger from bot.food
-                    snap_v.vector[1] = self._last_maslow_v[1]  # Nociception from bot.health
-                    self.theta_engine.latch_maslow(snap_v)
-                    self._last_maslow_v = snap_v.vector.copy()
+                    snap_vec = snap_v.vector.copy()
+                    snap_vec[0] = self._last_maslow_v[0]  # Hunger from bot.food
+                    snap_vec[1] = self._last_maslow_v[1]  # Nociception from bot.health
+                    merged_snap = MaslowSnapshot(
+                        timestamp_ns=time.time_ns(),
+                        vector=snap_vec,
+                        dominant_idx=int(np.argmax(snap_vec)),
+                    )
+                    self.theta_engine.latch_maslow(merged_snap)
+                    self._last_maslow_v = snap_vec
 
             # 2. Step Theta Pacemaker (50 Hz)
             with self._state_lock:

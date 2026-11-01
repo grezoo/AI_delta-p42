@@ -62,3 +62,4 @@ desktop.ini
 # Local runtime tools & packages
 tools/
 node_modules/
+server/
